@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ -z $VIRTUAL_ENV ]; then
+    echo "Must be in a virtual env"
+    exit 1
+fi
+
+if ! fab get_backup; then
+    echo "Failed getting backup. DB in use?"
+    exit 1
+fi
+
+fab get_media
+npm install
+pip install -r requirements/local.txt
+./manage.py migrate

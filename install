@@ -1,0 +1,3 @@
+#!/bin/bash
+mkdir -p ~/bin
+cp -f bin/* ~/bin
