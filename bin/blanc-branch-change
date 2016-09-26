@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ -z $VIRTUAL_ENV ]; then
+if [ -z "$VIRTUAL_ENV" ]; then
     echo "Must be in a virtual env"
     exit 1
 fi
