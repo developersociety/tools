@@ -44,7 +44,7 @@ function blanc-clone() {
     git clone "$GIT_URI"
     cd "$PROJECT_DIR"
     mkvirtualenv "$REPO_NAME"
-    setvirtualenvproject "$PROJECT_DIR"
+    setvirtualenvproject
 
     echo
     echo "Done."
