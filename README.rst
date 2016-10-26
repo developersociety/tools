@@ -15,6 +15,10 @@ To install these tools::
     $ cd tools
     $ ./install
 
+Add this to your `.bashrc`::
+
+    source $HOME/Projects/blanc-tools/source/blanc-clone
+
 Usage
 =====
 
@@ -35,6 +39,29 @@ Example of use:
 ::
 
     $ blanc-branch-change
+
+blanc-clone
+-------------------
+
+This tool will `git-clone` a repo from Blanc's github and setup virtualenvwrapper for you, with a
+virtualenv and a virtualenvwrapper project for you.
+
+It requires virtualenvwrapper to be installed with the `$PROJECT_HOME` environment variable set
+correctly.
+
+It will:
+
+* `git-clone` the repo from Blanc's github
+* setup virtualenv with virtualenvwrapper
+* setup virtualenvwrapper project dir
+
+Example of use:
+~~~~~~~~~~~~~~~
+
+::
+
+    $ blanc-clone cofebristol
+
 
 Development
 ===========
