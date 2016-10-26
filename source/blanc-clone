@@ -35,16 +35,13 @@ function blanc-clone() {
 
     echo "I'm going to clone: '$GIT_URI'"
     echo "Into this directory: '$PROJECT_DIR'"
-    echo "And then setup virtualenvwrapper for you."
+    echo "And setup virtualenvwrapper for you."
     echo
     echo "Press Enter to continue..."
     read
 
-    cd "$PROJECT_HOME"
-    git clone "$GIT_URI"
-    cd "$PROJECT_DIR"
-    mkvirtualenv "$REPO_NAME"
-    setvirtualenvproject
+    mkproject "$REPO_NAME"
+    git clone "$GIT_URI" .
 
     echo
     echo "Done."
