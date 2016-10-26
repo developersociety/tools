@@ -11,3 +11,4 @@ pip install -r requirements/local.txt
 fab get_backup
 fab get_media
 ./manage.py migrate
+./node_modules/grunt-cli/bin/grunt 'less:development' 'autoprefixer' 'cssmin'
