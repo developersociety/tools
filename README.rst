@@ -26,6 +26,7 @@ Run this tool after you change branch. It:
 * Installs all pip & NPM requirements are installed
 * Grabs a copy of the live/demo database & media files
 * Runs database migrations
+* Compiles the project's CSS
 
 It needs to be ran within a virtualenv and will error out if it detects it's not in a virtualenv.
 
