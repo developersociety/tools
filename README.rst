@@ -17,7 +17,7 @@ To install these tools::
 
 Add this to your `.bashrc`::
 
-    source $HOME/Projects/blanc-tools/source/blanc-clone
+    source ~/tools/source/blanc-clone
 
 Usage
 =====
