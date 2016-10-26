@@ -6,8 +6,8 @@ if [ -z "$VIRTUAL_ENV" ]; then
     exit 1
 fi
 
-fab get_backup
-fab get_media
 npm install
 pip install -r requirements/local.txt
+fab get_backup
+fab get_media
 ./manage.py migrate
