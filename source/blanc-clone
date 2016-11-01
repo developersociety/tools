@@ -1,0 +1,49 @@
+#!/bin/bash
+# set -e
+
+function blanc-clone() {
+
+    if ! hash mkvirtualenv; then
+        echo "You don't have virtualenvwrapper installed."
+        return 1
+    fi
+
+    if [ -n "$VIRTUAL_ENV" ]; then
+        echo "Unable to run as you're already in a virtualenv."
+        return 1
+    fi
+
+    if [ -z "$PROJECT_HOME" ]; then
+        echo '$PROJECT_HOME env variable not set. Go configure virtualenvwrapper'
+        return 1
+    fi
+
+    if [ $# != 1 ]; then
+        echo "Must specify repo name to clone"
+        return 1
+    fi
+
+    REPO_NAME="$1"
+    GIT_URI="git@github.com:blancltd/$REPO_NAME.git"
+    PROJECT_DIR="$PROJECT_HOME/$REPO_NAME"
+
+    if [ -a "$PROJECT_DIR" ]; then
+        echo "Target directory already exists:"
+        echo "  $PROJECT_DIR"
+        return 1
+    fi
+
+    echo "I'm going to clone: '$GIT_URI'"
+    echo "Into this directory: '$PROJECT_DIR'"
+    echo "And setup virtualenvwrapper for you."
+    echo
+    echo "Press Enter to continue..."
+    read
+
+    mkproject "$REPO_NAME"
+    git clone "$GIT_URI" .
+
+    echo
+    echo "Done."
+
+}
