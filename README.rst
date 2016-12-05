@@ -18,6 +18,8 @@ To install these tools::
 Add this to your `.bashrc`::
 
     source ~/tools/source/blanc-clone
+    source ~/tools/source/django-bash-completion
+
 
 Usage
 =====
