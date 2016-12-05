@@ -3,7 +3,7 @@ USERNAME="_dev"
 PASSWORD="password"
 EMAIL="_dev@blanc.ltd.uk"
 
-echo "import sys; from django.contrib.auth import get_user_model; obj = get_user_model().objects.create_superuser('$USERNAME', 'local_dev@blanc.ltd.uk', '$PASSWORD');" | python manage.py shell >> /dev/null
+echo "import sys; from django.contrib.auth import get_user_model; obj = get_user_model().objects.create_superuser('$USERNAME', '$EMAIL', '$PASSWORD');" | python manage.py shell >> /dev/null
 echo
 echo "Superuser details: "
 echo
