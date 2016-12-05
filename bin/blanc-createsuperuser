@@ -1,25 +1,11 @@
 #!/bin/bash
 USERNAME="_dev"
 PASSWORD="password"
+EMAIL="_dev@blanc.ltd.uk"
 
-if echo "
-import sys;
-from django.contrib.auth import get_user_model;
-try:
-    obj = get_user_model().objects.create_superuser('$USERNAME', 'local_dev@blanc.ltd.uk', '$PASSWORD');
-except:
-    sys.exit(1);
-" | python manage.py shell; then
-    echo
-    echo
-    echo "Created new superuser: "
-    echo
-    echo "    $USERNAME:$PASSWORD"
-else
-    echo
-    echo
-    echo "Superuser $USERNAME already existed: "
-    echo
-    echo "    $USERNAME:$PASSWORD"
-fi
+echo "import sys; from django.contrib.auth import get_user_model; obj = get_user_model().objects.create_superuser('$USERNAME', 'local_dev@blanc.ltd.uk', '$PASSWORD');" | python manage.py shell >> /dev/null
+echo
+echo "Superuser details: "
+echo
+echo "    $USERNAME:$PASSWORD"
 echo
