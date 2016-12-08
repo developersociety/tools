@@ -42,6 +42,7 @@ function blanc-clone() {
 
     mkproject "$REPO_NAME"
     git clone "$GIT_URI" .
+    blanc-add-git-hooks
 
     echo
     echo "Done."
