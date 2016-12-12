@@ -6,7 +6,9 @@ if [ -z "$VIRTUAL_ENV" ]; then
     exit 1
 fi
 
-npm install
+if [ -f "package.json" ]; then
+    npm install
+fi
 pip install -r requirements/local.txt
 fab get_backup
 fab get_media
