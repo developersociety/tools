@@ -5,11 +5,11 @@ if [ -z "$VIRTUAL_ENV" ]; then
     exit 1
 fi
 
-# pip uninstall doesn't handle editable installs well, so delete them first
-if ! pip list -e --format=columns | tail -n +3 | cut -f1 -d " " | xargs pip uninstall -y; then
-    echo "No editable packages to uninstall"
-fi
-
-if ! pip freeze | xargs pip uninstall -y; then
-    echo "No packages to uninstall"
+# Getting packages via "pip list --format=freeze" provides a nicer list than "pip freeze", which
+# displays editable packages in a way not supported by "pip uninstall"
+#
+# Need to make sure not to uninstall pip itself. List of things to avoid comes from docs for
+# "pip freeze --all"
+if ! pip list --format=freeze | grep -v "^pip=\|^setuptools=\|^distribute=\|^wheel=" | xargs pip uninstall -y; then
+    echo "Nothing to remove"
 fi
