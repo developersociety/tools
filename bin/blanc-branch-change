@@ -9,6 +9,7 @@ fi
 if [ -f "package.json" ]; then
     npm install
 fi
+blanc-wipeenv
 pip install -r requirements/local.txt
 fab get_backup
 fab get_media

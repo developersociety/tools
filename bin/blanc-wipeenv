@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ -z "$VIRTUAL_ENV" ]; then
+    echo "Must be in a virtual env"
+    exit 1
+fi
+
+# pip uninstall doesn't handle editable installs well, so delete them first
+if ! pip list -e --format=columns | tail -n +3 | cut -f1 -d " " | xargs pip uninstall -y; then
+    echo "No editable packages to uninstall"
+fi
+
+if ! pip freeze | xargs pip uninstall -y; then
+    echo "No packages to uninstall"
+fi
