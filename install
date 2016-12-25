@@ -3,4 +3,4 @@ mkdir -p ~/bin
 cp -f bin/* ~/bin
 
 mkdir -p ~/.blanc/git-hooks
-cp -f git-hooks/* ~/.blanc/git-hooks
+cp --remove-destination  git-hooks/* ~/.blanc/git-hooks
