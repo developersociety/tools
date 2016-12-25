@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ -z "$VIRTUAL_ENV" ]; then
+    echo "Must be in a virtual env"
+    exit 1
+fi
+
+# Getting packages via "pip list --format=freeze" provides a nicer list than "pip freeze", which
+# displays editable packages in a way not supported by "pip uninstall"
+#
+# Need to make sure not to uninstall pip itself. List of things to avoid comes from docs for
+# "pip freeze --all"
+if ! pip list --format=freeze | grep -v "^pip=\|^setuptools=\|^distribute=\|^wheel=" | xargs pip uninstall -y; then
+    echo "Nothing to remove"
+fi
