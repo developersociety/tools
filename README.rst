@@ -24,7 +24,7 @@ Add this to your `.bashrc`::
 Usage
 =====
 
-blanc-branch-change
+blanc-reset
 -------------------
 
 Run this tool after you change branch. It:
@@ -40,7 +40,7 @@ Example of use:
 
 ::
 
-    $ blanc-branch-change
+    $ blanc-reset
 
 blanc-clone
 -------------------
