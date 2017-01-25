@@ -10,6 +10,6 @@ fi
 #
 # Need to make sure not to uninstall pip itself. List of things to avoid comes from docs for
 # "pip freeze --all"
-if ! pip list --format=freeze | grep -v "^pip=\|^setuptools=\|^distribute=\|^wheel=" | xargs pip uninstall -y; then
+if ! pip list --format=freeze | grep -v "^appdirs=\|^distribute=\|^packaging=\|^pip=\|^pyparsing=\|^setuptools=\|^six=\|^wheel=" | xargs pip uninstall -y; then
     echo "Nothing to remove"
 fi
