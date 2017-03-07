@@ -1,0 +1,25 @@
+#!/bin/bash
+
+branches="$(git branch --merged master | grep -v "*" | grep -v "master")"
+
+if [[ -n $branches ]]; then
+    echo "Will remove the following branches:"
+    echo
+    echo "$branches"
+    echo
+    echo "Press Enter to delete the above branches, or <ctrl>-c to bail"
+    read
+
+    echo "$branches" | xargs git branch -d
+
+    echo "Done."
+else
+    echo "No local branches needing"
+fi
+
+echo
+echo "Pruning remotes..."
+git remote prune origin
+echo "Done."
+echo
+echo "Adidas, Amiga."
