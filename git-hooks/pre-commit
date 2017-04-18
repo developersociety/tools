@@ -1,5 +1,6 @@
 #!/bin/sh
 
 if [ -f tox.ini ]; then
-   tox -e flake8,isort;
+   make check
+   make lint
 fi
