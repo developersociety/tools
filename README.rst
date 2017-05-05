@@ -1,8 +1,8 @@
-=======================
-Blanc Development Tools
-=======================
+=========================================
+The Developer Society - Development Tools
+=========================================
 
-Tools for making development at Blanc quicker, easier and less error prone.
+Tools for making development at The Developer Society quicker, easier and less error prone.
 
 https://github.com/developersociety/tools
 
@@ -50,7 +50,7 @@ Example of use:
 dev-clone
 ---------
 
-This tool will `git-clone` a repo from Blanc's github and setup virtualenvwrapper for you, with a
+This tool will `git-clone` a repo from Dev's github and setup virtualenvwrapper for you, with a
 virtualenv and a virtualenvwrapper project for you.
 
 It requires virtualenvwrapper to be installed with the `$PROJECT_HOME` environment variable set
@@ -58,7 +58,7 @@ correctly.
 
 It will:
 
-* `git-clone` the repo from Blanc's github
+* `git-clone` the repo from Dev's github
 * setup virtualenv with virtualenvwrapper
 * setup virtualenvwrapper project dir
 
