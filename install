@@ -1,5 +1,15 @@
 #!/bin/bash
+
 mkdir -p ~/bin
+
+# Get rid of old blanc scripts if they exist.
+rm ~/bin/blanc-add-git-hooks 2> /dev/null
+rm ~/bin/blanc-createsuperuser 2> /dev/null
+rm ~/bin/blanc-reset 2> /dev/null
+rm ~/bin/blanc-clean-branches 2> /dev/null
+rm ~/bin/blanc-dev-superuser 2> /dev/null
+rm ~/bin/blanc-wipeenv 2> /dev/null
+
 cp -f bin/* ~/bin
 
 mkdir -p ~/.blanc/git-hooks
