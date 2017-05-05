@@ -1,7 +1,7 @@
 #!/bin/bash
 # set -e
 
-function blanc-clone() {
+function dev-clone() {
 
     if ! hash mkvirtualenv; then
         echo "You don't have virtualenvwrapper installed."
@@ -24,7 +24,7 @@ function blanc-clone() {
     fi
 
     REPO_NAME="$1"
-    GIT_URI="git@github.com:blancltd/$REPO_NAME.git"
+    GIT_URI="git@github.com:developersociety/$REPO_NAME.git"
     PROJECT_DIR="$PROJECT_HOME/$REPO_NAME"
 
     if [ -a "$PROJECT_DIR" ]; then
@@ -42,7 +42,7 @@ function blanc-clone() {
 
     mkproject "$REPO_NAME"
     git clone "$GIT_URI" .
-    blanc-add-git-hooks
+    dev-add-git-hooks
 
     echo
     echo "Done."

@@ -9,9 +9,9 @@ fi
 if [ -f "package.json" ]; then
     npm install
 fi
-blanc-wipeenv
+dev-wipeenv
 pip install -r requirements/local.txt
 fab get_backup
 fab get_media
 ./manage.py migrate
-blanc-createsuperuser
+dev-createsuperuser

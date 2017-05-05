@@ -4,28 +4,28 @@ Blanc Development Tools
 
 Tools for making development at Blanc quicker, easier and less error prone.
 
-https://github.com/blancltd/tools
+https://github.com/developersociety/tools
 
 Installation
 ============
 
 To install these tools::
 
-    $ git clone git@github.com:blancltd/tools.git
+    $ git clone git@github.com:developersociety/tools.git
     $ cd tools
     $ ./install
 
 Add this to your `.bashrc`::
 
-    source ~/tools/source/blanc-clone
+    source ~/tools/source/dev-clone
     source ~/tools/source/django-bash-completion
 
 
 Usage
 =====
 
-blanc-reset
------------
+dev-reset
+---------
 
 Run this tool whenever you need to reset the current environment. For example when you change
 branch or want to reset things to a virgin state.
@@ -44,11 +44,11 @@ Example of use:
 
 ::
 
-    $ blanc-reset
+    $ dev-reset
 
 
-blanc-clone
------------
+dev-clone
+---------
 
 This tool will `git-clone` a repo from Blanc's github and setup virtualenvwrapper for you, with a
 virtualenv and a virtualenvwrapper project for you.
@@ -67,11 +67,11 @@ Example of use:
 
 ::
 
-    $ blanc-clone cofebristol
+    $ dev-clone cofebristol
 
 
-blanc-add-git-hooks
--------------------
+dev-add-git-hooks
+-----------------
 
 Adds the Git Hooks to the current project. The [Git Hooks section](#user-content-git-hooks)
 gives more information about the individual Git Hooks.
@@ -81,11 +81,11 @@ Example of use:
 
 ::
 
-    $ blanc-add-git-hooks
+    $ dev-add-git-hooks
 
 
-blanc-createsuperuser
----------------------
+dev-createsuperuser
+-------------------
 
 Tries to add a Django superuser to the current project. The superuser will be created with the
 following credentials:
@@ -98,29 +98,29 @@ Example of use:
 
 ::
 
-    $ blanc-createsuperuser
+    $ dev-createsuperuser
 
 
-blanc-wipeenv
--------------
+dev-wipeenv
+-----------
 
 Removes all packages in the current virtualenv. It's likely you don't want to do this very often
-and you're actually looking for [blanc-reset](#user-content-blanc-reset), which runs
-`blanc-wipeenv` as part of its run.
+and you're actually looking for [dev-reset](#user-content-dev-reset), which runs
+`dev-wipeenv` as part of its run.
 
 Example of use:
 ~~~~~~~~~~~~~~~
 
 ::
 
-    $ blanc-wipeenv
+    $ dev-wipeenv
 
 
 Git Hooks
 =========
 
 The following Git Hooks are supplied with the Tools. They can be added to any repository by using
-the [blanc-add-git-hooks](#user-content-blanc-add-git-hooks) command.
+the [dev-add-git-hooks](#user-content-dev-add-git-hooks) command.
 
 pre-commit
 ----------
