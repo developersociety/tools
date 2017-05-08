@@ -116,6 +116,28 @@ Example of use:
     $ blanc-wipeenv
 
 
+dev-git-blanc-be-gone
+---------------------
+
+A handy tool to change the URL of the 'origin' remote from:
+
+* git@github.com:blancltd/something.git
+
+To:
+
+* git@github.com:developersociety/something.git
+
+Will only change anything if it detects the current project's origin URL is for 'blancltd', so is
+safe to use willy-nilly.
+
+Example of use:
+~~~~~~~~~~~~~~~
+
+::
+
+    $ dev-git-blanc-be-gone
+
+
 Git Hooks
 =========
 
