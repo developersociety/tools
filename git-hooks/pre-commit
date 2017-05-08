@@ -1,5 +1,8 @@
 #!/bin/sh
 
-if [ -f tox.ini ]; then
-   tox -e flake8,isort;
+if [ -f Makefile ]; then
+   make check
+   make lint
+elif [ -f tox.ini ]; then
+    tox -e flake8,isort
 fi

@@ -1,4 +1,15 @@
 #!/bin/bash
+if [ -f Makefile ]; then
+    echo
+    echo "--------- Makefile detected ---------"
+    echo
+    echo "Recommended you perform this action using the following Makefile command:"
+    echo
+    echo -e "\tmake venv-wipe"
+    echo
+    echo "<ctrl>-c to quit, or <enter> to run anyway..."
+    read
+fi
 
 if [ -z "$VIRTUAL_ENV" ]; then
     echo "Must be in a virtual env"
