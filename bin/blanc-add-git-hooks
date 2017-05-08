@@ -1,3 +1,0 @@
-#!/bin/bash
-
-cp --remove-destination ~/.blanc/git-hooks/* .git/hooks/

@@ -2,5 +2,5 @@
 mkdir -p ~/bin
 cp -f bin/* ~/bin
 
-mkdir -p ~/.blanc/git-hooks
-cp --remove-destination  git-hooks/* ~/.blanc/git-hooks
+mkdir -p ~/.developersociety/git-hooks
+cp --remove-destination  git-hooks/* ~/.developersociety/git-hooks

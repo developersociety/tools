@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cp --remove-destination ~/.developersociety/git-hooks/* .git/hooks/
