@@ -15,10 +15,6 @@ To install these tools::
     $ cd tools
     $ ./install
 
-Add this to your `.bashrc`::
-
-    source ~/tools/source/django-bash-completion
-
 
 Usage
 =====
@@ -67,20 +63,6 @@ Example of use:
 ::
 
     $ dev-clone cofebristol
-
-
-dev-add-git-hooks
------------------
-
-Adds the Git Hooks to the current project. The [Git Hooks section](#user-content-git-hooks)
-gives more information about the individual Git Hooks.
-
-Example of use:
-~~~~~~~~~~~~~~~
-
-::
-
-    $ dev-add-git-hooks
 
 
 dev-createsuperuser
@@ -135,34 +117,6 @@ Example of use:
 ::
 
     $ dev-git-blanc-be-gone
-
-
-Git Hooks
-=========
-
-The following Git Hooks are supplied with the Tools. They can be added to any repository by using
-the [dev-add-git-hooks](#user-content-dev-add-git-hooks) command.
-
-pre-commit
-----------
-
-If the current project is configured to use Tox, then it will attempt to run the Flake8 and Isort
-Tox environments.
-
-pre-push
---------
-
-If the current project is configured to use Tox, then it will do a full Tox run.
-
-
-Django Manage Bash Autocomplete
-===============================
-
-Add the following line to your `.bashrc` to enable autocomplete for Django's `./manage.py` script::
-
-    source ~/tools/source/django-bash-completion
-
-Now pressing `<tab>` will autocomplete `./manage.py` commands.
 
 
 Development

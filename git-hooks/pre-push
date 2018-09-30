@@ -1,5 +1,0 @@
-#!/bin/sh
-
-if [ -f tox.ini ]; then
-   tox;
-fi

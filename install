@@ -11,6 +11,3 @@ rm -f ~/bin/blanc-dev-superuser
 rm -f ~/bin/blanc-wipeenv
 
 cp -f bin/* ~/bin
-
-mkdir -p ~/.developersociety/git-hooks
-cp --remove-destination  git-hooks/* ~/.developersociety/git-hooks
