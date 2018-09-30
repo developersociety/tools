@@ -9,11 +9,19 @@ https://github.com/developersociety/tools
 Installation
 ============
 
-To install these tools::
+To install these tools:
+
+.. code:: console
 
     $ git clone git@github.com:developersociety/tools.git
-    $ cd tools
-    $ ./install
+    $ cd tools/bin
+    $ pwd
+
+Add the bin directory to your ``$PATH``, by editing your ``~/.bash_profile``:
+
+.. code:: bash
+
+    export PATH="/path/to/tools/bin:$PATH"
 
 
 Usage
@@ -37,7 +45,7 @@ It needs to be ran within a virtualenv and will error out if it detects it's not
 Example of use:
 ~~~~~~~~~~~~~~~
 
-::
+.. code:: console
 
     $ dev-reset
 
