@@ -1,0 +1,46 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+# shellcheck disable=SC1090
+source "$VIRTUALENVWRAPPER_SCRIPT"
+
+if [ $# != 1 ]; then
+    echo "Must specify repo name to clone"
+    exit 1
+fi
+
+REPO_NAME="$1"
+GIT_URI="git@github.com:developersociety/$REPO_NAME.git"
+PROJECT_DIR="$PROJECT_HOME/$REPO_NAME"
+
+if [ -a "$PROJECT_DIR" ]; then
+    echo "Target directory already exists:"
+    echo "  $PROJECT_DIR"
+    exit 1
+fi
+
+echo "I'm going to clone: $GIT_URI"
+echo "Into this directory: $PROJECT_DIR"
+echo "And setup virtualenvwrapper for you."
+echo
+echo "Press Enter to continue..."
+read -r
+
+mkdir "$PROJECT_DIR"
+cd "$PROJECT_DIR"
+git clone "$GIT_URI" .
+
+# mkproject fails with super strict mode - so we need to allow unbound variables at this point
+set +u
+
+if grep --fixed-strings --silent "basepython" tox.ini;
+then
+    PYTHON_VERSION=$(sed -e 's/basepython[[:space:]]=[[:space:]]//' -e 'tx' -e 'd' -e ':x' tox.ini | head -n 1)
+    mkproject --force --python="$PYTHON_VERSION" "$REPO_NAME"
+else
+    mkproject --force "$REPO_NAME"
+fi
+
+echo
+echo "Done - to active this project: workon $REPO_NAME"
