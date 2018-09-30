@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+if [ $# != 1 ]; then
+    echo "Must specify repo name to clone"
+    exit 1
+fi
+
+GIT_REPO=$1
+
+echo "Archiving ${GIT_REPO}"
+
+TMPDIR=$(mktemp -d)
+
+cd "$TMPDIR"
+git clone --bare "git@github.com:developersociety/${GIT_REPO}.git"
+cd "${GIT_REPO}.git"
+git push --mirror "git@smirkenorff.devsoc.org:archive/${GIT_REPO}.git"
+rm -rf "$TMPDIR"
