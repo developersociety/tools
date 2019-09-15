@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
 
 if [ -z "$VIRTUAL_ENV" ]; then
     echo "Must be in a virtual env"
