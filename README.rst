@@ -93,14 +93,12 @@ Example of use:
 dev-wipeenv
 -----------
 
-Removes all packages in the current virtualenv. It's likely you don't want to do this very often
-and you're actually looking for [dev-reset](#user-content-dev-reset), which runs
-`dev-wipeenv` as part of its run.
+Removes all packages in the current virtualenv.
 
 Example of use:
 ~~~~~~~~~~~~~~~
 
-::
+.. code-block:: console
 
     $ dev-wipeenv
 
