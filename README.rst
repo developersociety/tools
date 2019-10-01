@@ -50,23 +50,6 @@ Example of use:
     $ dev-clone cofebristol
 
 
-dev-createsuperuser
--------------------
-
-Tries to add a Django superuser to the current project. The superuser will be created with the
-following credentials:
-
-**Username:** `_dev`
-**Password:** `password`
-
-Example of use:
-~~~~~~~~~~~~~~~
-
-::
-
-    $ dev-createsuperuser
-
-
 dev-wipeenv
 -----------
 
