@@ -27,29 +27,6 @@ Add the bin directory to your ``$PATH``, by editing your ``~/.bash_profile``:
 Usage
 =====
 
-dev-reset
----------
-
-Run this tool whenever you need to reset the current environment. For example when you change
-branch or want to reset things to a virgin state.
-
-It will:
-
-* Removes all packages currently installed in the current virtualenv
-* Installs all pip & NPM requirements are installed
-* Grabs a copy of the live/demo database & media files
-* Runs database migrations
-
-It needs to be ran within a virtualenv and will error out if it detects it's not in a virtualenv.
-
-Example of use:
-~~~~~~~~~~~~~~~
-
-.. code:: console
-
-    $ dev-reset
-
-
 dev-clone
 ---------
 
