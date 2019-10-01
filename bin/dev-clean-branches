@@ -1,16 +1,19 @@
 #!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
 
-branches="$(git branch --merged master | grep -v "*" | grep -v "master")"
+DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed -e "s|^refs/remotes/origin/||")
+BRANCHES=$(git branch --merged "$DEFAULT_BRANCH" --format "%(refname:short)" | grep -v -e "^master$" -e "^dev$" -e "^${DEFAULT_BRANCH}$")
 
-if [[ -n $branches ]]; then
+if [[ -n $BRANCHES ]]; then
     echo "Will remove the following branches:"
     echo
-    echo "$branches"
+    echo "$BRANCHES"
     echo
     echo "Press Enter to delete the above branches, or <ctrl>-c to bail"
-    read
+    read -r
 
-    echo "$branches" | xargs git branch -d
+    echo "$BRANCHES" | xargs git branch -d
 
     echo "Done."
 else
