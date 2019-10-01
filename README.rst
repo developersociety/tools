@@ -45,9 +45,9 @@ It will:
 Example of use:
 ~~~~~~~~~~~~~~~
 
-::
+.. code-block:: console
 
-    $ dev-clone cofebristol
+    $ dev-clone devsoc
 
 
 dev-wipeenv
