@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
+MFA_CODE=$(aws-mfa-code.sh devsoc aws-devsoc)
+exec aws-vault login --mfa-token="$MFA_CODE" "$@"
