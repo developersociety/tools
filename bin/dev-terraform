@@ -2,5 +2,4 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-MFA_CODE=$(aws-mfa-code.sh devsoc aws-devsoc)
-exec aws-vault exec devsoc-terraform --mfa-token="$MFA_CODE" -- terraform "$@"
+exec aws-vault exec devsoc-terraform -- terraform "$@"
