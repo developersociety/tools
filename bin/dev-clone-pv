@@ -1,0 +1,60 @@
+#!/bin/bash
+# Set up using virtualenv rather than virtualenvwrapper
+
+set -euo pipefail
+IFS=$'\n\t'
+
+if [ $# != 1 ]; then
+    echo "Must specify repo name to clone"
+    exit 1
+fi
+
+REPO_NAME="$1"
+GIT_URI="git@github.com:developersociety/$REPO_NAME.git"
+PROJECT_DIR="$PROJECT_HOME/$REPO_NAME"
+
+if [ -a "$PROJECT_DIR" ]; then
+    echo "Target directory already exists:"
+    echo "  $PROJECT_DIR"
+    exit 1
+fi
+
+echo "Cloning: $GIT_URI"
+echo "Into this directory: $PROJECT_DIR"
+echo
+echo "Press Enter to continue..."
+read -r
+
+mkdir "$PROJECT_DIR"
+cd "$PROJECT_DIR"
+git clone "$GIT_URI" .
+
+if grep --fixed-strings --silent "basepython" tox.ini;
+then
+    TOX_VERSION=$(sed -e 's/basepython[[:space:]]=[[:space:]]python//' -e 'tx' -e 'd' -e ':x' tox.ini | head -n 1)
+    echo "tox specifies python $TOX_VERSION"
+    PY_VERSION=$(pyenv versions | grep -e "^* $TOX_VERSION.[0-9]*" | grep -o '[0-9]*\.[0-9]*\.[0-9]*')
+    echo "matching pyenv installed python version:"
+    echo $PY_VERSION
+    echo ""
+    PYTHON_ENV_NAME="$REPO_NAME"-"$PY_VERSION"
+
+    echo "I'm going to create a python environment on version $PY_VERSION"
+    echo "With a virtualenv called $PYTHON_ENV_NAME"
+    echo "Activated in this directory: $PROJECT_DIR"
+    echo "And setup with pyenv-virtualenv for you."
+    echo
+    echo "Press Enter to continue..."
+    read -r
+    pyenv virtualenv "$PY_VERSION" "$PYTHON_ENV_NAME"
+    echo "$PYTHON_ENV_NAME" > $PROJECT_DIR/.python-version
+else
+    echo "No python version found for virtual environment"
+    exit 1
+fi
+
+echo ""
+echo "Done - to active this project navigate to the project folder ($PROJECT_DIR)"
+echo "and it will activate $PYTHON_ENV_NAME"
+
+cd $PROJECT_DIR
