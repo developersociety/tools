@@ -9,7 +9,7 @@ if [[ ! -f .git/refs/remotes/origin/HEAD ]]; then
 fi
 
 DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed -e "s|^refs/remotes/origin/||")
-BRANCHES=$(git branch --merged "$DEFAULT_BRANCH" --format "%(refname:short)" | grep -v -e "^master$" -e "^dev$" -e "^${DEFAULT_BRANCH}$")
+BRANCHES=$(git branch --merged "$DEFAULT_BRANCH" --format "%(refname:short)" | grep -v -e "^main$" -e "^master$" -e "^dev$" -e "^${DEFAULT_BRANCH}$")
 
 if [[ -n $BRANCHES ]]; then
     echo "Will remove the following branches:"
