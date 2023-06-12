@@ -37,7 +37,10 @@ set +u
 if grep --fixed-strings --silent "basepython" tox.ini;
 then
     PYTHON_VERSION=$(sed -e 's/basepython[[:space:]]=[[:space:]]//' -e 'tx' -e 'd' -e ':x' tox.ini | head -n 1)
-    mkproject --force --python="$PYTHON_VERSION" "$REPO_NAME"
+    PYTHON_VERSION_NUMBER=${PYTHON_VERSION/python/}
+    LATEST_PYTHON=$(pyenv latest "$PYTHON_VERSION_NUMBER")
+    VIRTUALENV_EXE=$(PYENV_VERSION=$LATEST_PYTHON pyenv which virtualenv)
+    VIRTUALENVWRAPPER_VIRTUALENV=$VIRTUALENV_EXE mkproject --force --python="$PYTHON_VERSION" "$REPO_NAME"
 else
     mkproject --force "$REPO_NAME"
 fi
