@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
+if [ $# != 1 ]; then
+    echo "Must specify username"
+    exit 1
+fi
+
+CONFIG_USERNAME="$1"
+
+mkdir -p ~/.aws
+
+if [ -f ~/.aws/config ]; then
+    OLD_TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
+    echo "Backup of existing config saved to: $HOME/.aws/config.old.$OLD_TIMESTAMP"
+    mv ~/.aws/config "$HOME/.aws/config.old.$OLD_TIMESTAMP"
+fi
+
+op read "op://Shared/AWS Config Template/notesPlain" | sed -e "s|USERNAME|$CONFIG_USERNAME|g" > ~/.aws/config
+
+echo "Config file updated!"
