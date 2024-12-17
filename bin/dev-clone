@@ -48,10 +48,10 @@ then
     PYTHON_VERSION_NUMBER=${PYTHON_VERSION/python/}
     LATEST_PYTHON=$(pyenv latest "$PYTHON_VERSION_NUMBER")
     VIRTUALENV_EXE=$(PYENV_VERSION=$LATEST_PYTHON pyenv which virtualenv)
-    VIRTUALENVWRAPPER_VIRTUALENV=$VIRTUALENV_EXE mkproject --force --python="$PYTHON_VERSION" "$REPO_NAME"
+    VIRTUALENVWRAPPER_VIRTUALENV=$VIRTUALENV_EXE mkproject --force --python="$PYTHON_VERSION" "$PROJECT_NAME"
 else
-    mkproject --force "$REPO_NAME"
+    mkproject --force "$PROJECT_NAME"
 fi
 
 echo
-echo "Done - to active this project: workon $REPO_NAME"
+echo "Done - to active this project: workon $PROJECT_NAME"
