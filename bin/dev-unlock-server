@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
+if [[ $# -ne 1 ]]; then
+    echo "Usage: dev-unlock-server hostname.devsoc.org" >&2
+    exit 1
+fi
+HOST="$1"
+
+LUKS_PASSPHRASE=$(op read "op://aizi3l3vxjc52mboshwj7bbytq/$HOST/password")
+echo -n "$LUKS_PASSPHRASE" | \
+    ssh -o UserKnownHostsFile="$HOME/.ssh/known_hosts.cryptroot-unlock" \
+        -o StrictHostKeyChecking=accept-new \
+        -o BatchMode=yes \
+        "root@$HOST" cryptroot-unlock
