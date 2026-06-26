@@ -1,0 +1,31 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+# shellcheck disable=SC1090
+source "$VIRTUALENVWRAPPER_SCRIPT"
+
+if [[ $# -ne 2 ]]; then
+    echo "Usage: dev-virtualenv version project-name"
+    exit 1
+fi
+
+PYTHON_VERSION="$1"
+PROJECT_NAME="$2"
+VIRTUALENV_DIR="$HOME/.virtualenvs/$PROJECT_NAME"
+
+if [ -a "$VIRTUALENV_DIR" ]; then
+    echo "virtualenv already exists"
+    exit 1
+fi
+
+# mkvirtualenv fails with super strict mode - so we need to allow unbound variables at this point
+set +u
+
+PYTHON_VERSION_NUMBER=${PYTHON_VERSION/python/}
+LATEST_PYTHON=$(pyenv latest "$PYTHON_VERSION_NUMBER")
+VIRTUALENV_EXE=$(PYENV_VERSION=$LATEST_PYTHON pyenv which virtualenv)
+VIRTUALENVWRAPPER_VIRTUALENV=$VIRTUALENV_EXE mkvirtualenv --python="$PYTHON_VERSION" "$PROJECT_NAME"
+
+echo
+echo "Done - to active this virtualenv: workon $PROJECT_NAME"
