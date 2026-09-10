@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
+# Homebrew symlinks every dev-* script into the same bin directory as this one, so siblings can
+# always be found relative to $0 without resolving symlinks.
+BINDIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Each script documents itself in the comment block starting at its "# help:" line, so there is
+# no separate list of usage text to keep in step with the scripts.
+doc_block() {
+    awk '
+        /^# help: / { inblock = 1 }
+        inblock && !/^#/ { exit }
+        inblock { sub(/^# ?/, ""); sub(/^help: /, ""); print }
+    ' "$1"
+}
+
+usage() {
+    echo "Usage: dev <command> [args]"
+    echo
+    echo "Commands:"
+    for script in "$BINDIR"/dev-*; do
+        [[ -x $script ]] || continue
+        printf "  %-18s %s\n" "${script##*/dev-}" "$(doc_block "$script" | head -n 1)"
+    done
+    echo
+    echo "Run 'dev help <command>' for more detail on a single command."
+}
+
+die_unknown() {
+    echo "Unknown command: $1" >&2
+    echo >&2
+    usage >&2
+    exit 1
+}
+
+command_help() {
+    local name="$1"
+    local script="$BINDIR/dev-$name"
+
+    if [[ ! -x $script ]]; then
+        die_unknown "$name"
+    fi
+
+    doc_block "$script"
+}
+
+SUBCOMMAND="${1:-}"
+
+case "$SUBCOMMAND" in
+"" | -h | --help)
+    usage
+    exit 0
+    ;;
+help)
+    if [[ -n ${2:-} ]]; then
+        command_help "$2"
+    else
+        usage
+    fi
+    exit 0
+    ;;
+esac
+
+shift
+COMMAND="$BINDIR/dev-$SUBCOMMAND"
+
+if [[ ! -x $COMMAND ]]; then
+    die_unknown "$SUBCOMMAND"
+fi
+
+exec "$COMMAND" "$@"
