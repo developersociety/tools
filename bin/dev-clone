@@ -1,32 +1,108 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 IFS=$'\n\t'
+
+# help: Clone a repo and set up virtualenvwrapper for it
+#
+# Usage:
+#   dev clone [--vscode] [org/]repo
+#
+# Accepts a bare repo name, "org/repo", or a URL pasted from the browser. Requires
+# virtualenvwrapper, with $PROJECT_HOME set. The Python version comes from .python-version or
+# tox.ini's basepython, and repos which don't look like Python projects skip the virtualenv.
+#
+# --vscode also writes a .code-workspace file pointing at the project's interpreter, and hides it
+# from git.
+
+if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
+DEFAULT_ORG="developersociety"
+
+MAKE_VSCODE_WORKSPACE=0
+if [[ ${1:-} == "--vscode" ]]; then
+    MAKE_VSCODE_WORKSPACE=1
+    shift
+fi
+
+if [ $# != 1 ]; then
+    echo "Usage: dev clone [--vscode] [org/]repo"
+    exit 1
+fi
+
+if [ -z "${PROJECT_HOME:-}" ] || [ -z "${VIRTUALENVWRAPPER_SCRIPT:-}" ]; then
+    echo "\$PROJECT_HOME and \$VIRTUALENVWRAPPER_SCRIPT must be set."
+    echo "Is virtualenvwrapper installed and set up in your shell?"
+    exit 1
+fi
 
 # shellcheck disable=SC1090
 source "$VIRTUALENVWRAPPER_SCRIPT"
 
-if [ $# != 1 ]; then
-    echo "Must specify repo name to clone"
-    exit 1
-fi
+# Accept anything you might have in your clipboard: repo, org/repo, or a URL from the browser.
+REPO_ARG="$1"
+REPO_ARG="${REPO_ARG#https://github.com/}"
+REPO_ARG="${REPO_ARG#git@github.com:}"
+REPO_ARG="${REPO_ARG%/}"
+REPO_ARG="${REPO_ARG%.git}"
 
-# Handle org/repo, and repo
-if [[ $1 == *"/"* ]]; then
-    REPO_NAME="$1"
-    PROJECT_NAME="${1##*/}"
+if [[ $REPO_ARG == *"/"* ]]; then
+    REPO_NAME="$REPO_ARG"
 else
-    REPO_NAME="developersociety/$1"
-    PROJECT_NAME="$1"
+    REPO_NAME="$DEFAULT_ORG/$REPO_ARG"
 fi
 
+PROJECT_NAME="${REPO_NAME##*/}"
 GIT_URI="git@github.com:$REPO_NAME.git"
 PROJECT_DIR="$PROJECT_HOME/$PROJECT_NAME"
+VENV_DIR="${WORKON_HOME:-$HOME/.virtualenvs}/$PROJECT_NAME"
 
-if [ -a "$PROJECT_DIR" ]; then
+if [ -e "$PROJECT_DIR" ]; then
     echo "Target directory already exists:"
     echo "  $PROJECT_DIR"
     exit 1
 fi
+
+is_python_project() {
+    [ -f tox.ini ] || [ -f pyproject.toml ] || [ -f requirements.txt ] || [ -f .python-version ]
+}
+
+project_python_version() {
+    # Projects pin their Python version in whichever place was fashionable when they started.
+    if [ -f .python-version ]; then
+        head -n 1 .python-version
+    elif [ -f tox.ini ]; then
+        sed -n -e 's/^[[:space:]]*basepython[[:space:]]*=[[:space:]]*python//p' tox.ini | head -n 1
+    fi
+}
+
+write_vscode_workspace() {
+    local workspace_file="$PROJECT_DIR/$PROJECT_NAME.code-workspace"
+    local interpreter_setting=""
+
+    if [ -x "$VENV_DIR/bin/python" ]; then
+        interpreter_setting="\"python.defaultInterpreterPath\": \"$VENV_DIR/bin/python\""
+    fi
+
+    cat >"$workspace_file" <<WORKSPACE
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        $interpreter_setting
+    }
+}
+WORKSPACE
+
+    # Keep the workspace file out of "git status" - it's personal, not part of the project.
+    echo "$PROJECT_NAME.code-workspace" >>"$PROJECT_DIR/.git/info/exclude"
+
+    echo "VS Code workspace written to: $workspace_file"
+}
 
 echo "I'm going to clone: $GIT_URI"
 echo "Into this directory: $PROJECT_DIR"
@@ -35,23 +111,35 @@ echo
 echo "Press Enter to continue..."
 read -r
 
-mkdir "$PROJECT_DIR"
+git clone "$GIT_URI" "$PROJECT_DIR"
 cd "$PROJECT_DIR"
-git clone "$GIT_URI" .
 
-# mkproject fails with super strict mode - so we need to allow unbound variables at this point
-set +u
+if is_python_project; then
+    # mkproject fails with super strict mode - so we need to allow unbound variables at this point
+    set +u
 
-if grep --fixed-strings --silent "basepython" tox.ini;
-then
-    PYTHON_VERSION=$(sed -e 's/basepython[[:space:]]=[[:space:]]//' -e 'tx' -e 'd' -e ':x' tox.ini | head -n 1)
-    PYTHON_VERSION_NUMBER=${PYTHON_VERSION/python/}
-    LATEST_PYTHON=$(pyenv latest "$PYTHON_VERSION_NUMBER")
-    VIRTUALENV_EXE=$(PYENV_VERSION=$LATEST_PYTHON pyenv which virtualenv)
-    VIRTUALENVWRAPPER_VIRTUALENV=$VIRTUALENV_EXE mkproject --force --python="$PYTHON_VERSION" "$PROJECT_NAME"
+    PYTHON_VERSION=$(project_python_version)
+
+    if [ -n "$PYTHON_VERSION" ] && command -v pyenv >/dev/null; then
+        LATEST_PYTHON=$(pyenv latest "$PYTHON_VERSION")
+        PYTHON_EXE=$(PYENV_VERSION=$LATEST_PYTHON pyenv which python)
+        VIRTUALENV_EXE=$(PYENV_VERSION=$LATEST_PYTHON pyenv which virtualenv)
+        VIRTUALENVWRAPPER_VIRTUALENV=$VIRTUALENV_EXE mkproject --force --python="$PYTHON_EXE" \
+            "$PROJECT_NAME"
+    else
+        mkproject --force "$PROJECT_NAME"
+    fi
+
+    set -u
+    FINAL_MESSAGE="Done - to activate this project: workon $PROJECT_NAME"
 else
-    mkproject --force "$PROJECT_NAME"
+    FINAL_MESSAGE="Done - this doesn't look like a Python project, so no virtualenv was created."
 fi
 
 echo
-echo "Done - to active this project: workon $PROJECT_NAME"
+
+if [ "$MAKE_VSCODE_WORKSPACE" = 1 ]; then
+    write_vscode_workspace
+fi
+
+echo "$FINAL_MESSAGE"
