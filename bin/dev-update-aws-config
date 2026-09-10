@@ -2,21 +2,60 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-if [ $# != 1 ]; then
-    echo "Must specify username"
+# help: Rewrite ~/.aws/config from the 1Password template
+#
+# Usage:
+#   dev update-aws-config [username]
+#
+# Shows a diff and asks before replacing anything. The username defaults to $USER, and the last
+# 5 backups are kept alongside the config.
+
+if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
+BACKUPS_TO_KEEP=5
+CONFIG_FILE="$HOME/.aws/config"
+
+CONFIG_USERNAME="${1:-$USER}"
+
+if ! op account get >/dev/null 2>&1; then
+    echo "1Password CLI not usable. Install it with 'brew install --cask 1password-cli',"
+    echo "or sign in with: eval \$(op signin)"
     exit 1
 fi
 
-CONFIG_USERNAME="$1"
+mkdir -p "$HOME/.aws"
 
-mkdir -p ~/.aws
+# Render to a temporary file first, so a failed "op read" can't leave you with no config at all.
+TMPFILE=$(mktemp)
+trap 'rm -f "$TMPFILE"' EXIT
 
-if [ -f ~/.aws/config ]; then
-    OLD_TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
-    echo "Backup of existing config saved to: $HOME/.aws/config.old.$OLD_TIMESTAMP"
-    mv ~/.aws/config "$HOME/.aws/config.old.$OLD_TIMESTAMP"
+op read "op://Shared/AWS Config Template/notesPlain" |
+    sed -e "s|USERNAME|$CONFIG_USERNAME|g" >"$TMPFILE"
+
+if [ -f "$CONFIG_FILE" ]; then
+    if diff -u "$CONFIG_FILE" "$TMPFILE"; then
+        echo "Config is already up to date for '$CONFIG_USERNAME'."
+        exit 0
+    fi
+
+    echo
+    echo "Press Enter to apply the above changes for '$CONFIG_USERNAME', or <ctrl>-c to bail"
+    read -r
+
+    TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
+    cp "$CONFIG_FILE" "$CONFIG_FILE.old.$TIMESTAMP"
+    echo "Backup of existing config saved to: $CONFIG_FILE.old.$TIMESTAMP"
 fi
 
-op read "op://Shared/AWS Config Template/notesPlain" | sed -e "s|USERNAME|$CONFIG_USERNAME|g" > ~/.aws/config
+mv "$TMPFILE" "$CONFIG_FILE"
+
+# Backups otherwise accumulate forever, one per run.
+{ ls -1t "$CONFIG_FILE".old.* 2>/dev/null || true; } |
+    tail -n +$((BACKUPS_TO_KEEP + 1)) |
+    while read -r OLD_BACKUP; do
+        rm -f "$OLD_BACKUP"
+    done
 
 echo "Config file updated!"
