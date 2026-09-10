@@ -111,26 +111,33 @@ $ export PATH="$PWD/bin:$PATH"
 $ dev help
 ```
 
-To test the Homebrew formula itself, tap your own checkout. Homebrew clones committed state, and
-the formula fetches from GitHub, so point it at your working copy first and commit that change
-locally — don't push it:
+To test the Homebrew formula itself, tap the repo and check out the branch you want in the tap's
+own clone. The formula builds from that clone, so whatever branch it's on is what gets installed
+— nothing needs pushing to GitHub, and the formula needs no editing:
 
 ```console
-$ sed -i '' "s|git@github.com:developersociety/tools.git|file://$PWD|" Formula/devtools.rb
-$ git commit -am "Local formula test"
+$ brew tap developersociety/tools git@github.com:developersociety/tools.git
+$ brew trust developersociety/tools
 
-$ brew tap local/tools "$PWD"
-$ brew trust local/tools
-$ brew install local/tools/devtools
+$ git -C "$(brew --repo developersociety/tools)" switch some-branch
+$ brew fetch --force devtools
+$ brew install devtools
+$ brew test devtools
 $ dev help
 ```
 
-Then put it back:
+Then switch the tap clone back to `master` when you're done.
+
+Two things to know. Homebrew clones committed state, so commit before installing — staged and
+unstaged work is invisible to it, and a missing file shows up as a mysteriously incomplete
+install rather than an error. And it caches the clone against the formula's `version`, so
+`brew fetch --force devtools` is needed between installs of the same version.
+
+To remove it again:
 
 ```console
 $ brew uninstall devtools
-$ brew untap local/tools
-$ git reset --hard HEAD~1
+$ brew untap developersociety/tools
 ```
 
 Note that `brew uninstall` also sweeps up orphaned dependencies, so check what it reports before
