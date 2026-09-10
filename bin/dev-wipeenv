@@ -1,8 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 IFS=$'\n\t'
 
-if [ -z "$VIRTUAL_ENV" ]; then
+# help: Uninstall every package in the active virtualenv
+#
+# Usage:
+#   dev wipeenv
+#
+# Lists what it is about to remove and asks first. pip, setuptools and wheel are left alone.
+
+if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
+if [ -z "${VIRTUAL_ENV:-}" ]; then
     echo "Must be in a virtual env"
     exit 1
 fi
@@ -12,6 +23,18 @@ fi
 #
 # Need to make sure not to uninstall pip itself. List of things to avoid comes from docs for
 # "pip freeze --all"
-if ! pip list --format=freeze | grep -v "^pip=\|^setuptools=\|^wheel=" | xargs pip uninstall -y; then
+PACKAGES=$(pip list --format=freeze | grep -v "^pip=\|^setuptools=\|^wheel=" || true)
+
+if [ -z "$PACKAGES" ]; then
     echo "Nothing to remove"
+    exit 0
 fi
+
+echo "Will uninstall the following from $VIRTUAL_ENV:"
+echo
+echo "$PACKAGES"
+echo
+echo "Press Enter to uninstall the above packages, or <ctrl>-c to bail"
+read -r
+
+echo "$PACKAGES" | xargs pip uninstall -y
