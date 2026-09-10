@@ -1,6 +1,26 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 IFS=$'\n\t'
+
+# help: Delete merged local branches, including squash-merged ones, and prune remotes
+#
+# Usage:
+#   dev clean-branches [--yes]
+#
+# Deletes local branches whose changes have landed on the default branch. Squash-merged branches
+# are found too, which "git branch --merged" cannot do on its own. main, master, dev and the
+# repo's own default branch are never deleted.
+
+if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
+PROTECTED_BRANCHES="^main$|^master$|^dev$"
+
+ASSUME_YES=0
+if [[ ${1:-} == "-y" || ${1:-} == "--yes" ]]; then
+    ASSUME_YES=1
+fi
 
 # If the remote repo was added without the usual clone, then HEAD might be missing. A quick fix
 # can restore HEAD to the expected branch.
@@ -9,21 +29,57 @@ if [[ ! -f .git/refs/remotes/origin/HEAD ]]; then
 fi
 
 DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed -e "s|^refs/remotes/origin/||")
-BRANCHES=$(git branch --merged "$DEFAULT_BRANCH" --format "%(refname:short)" | grep -v -e "^main$" -e "^master$" -e "^dev$" -e "^${DEFAULT_BRANCH}$")
 
-if [[ -n $BRANCHES ]]; then
+# Compare against the remote branch rather than the local one, which may be stale or absent.
+BASE_BRANCH="origin/$DEFAULT_BRANCH"
+
+is_squash_merged() {
+    # A squash-merge leaves no ancestry behind, so "git branch --merged" cannot see it. Replaying
+    # the branch's tree as a single commit on top of the merge base gives git something it can
+    # recognise: if that commit is already present in the base branch, the changes have landed.
+    local branch="$1"
+    local merge_base squashed
+
+    merge_base=$(git merge-base "$BASE_BRANCH" "$branch")
+    squashed=$(git commit-tree "$branch^{tree}" -p "$merge_base" -m "squash-merge check")
+
+    ! git cherry "$BASE_BRANCH" "$squashed" | grep -q "^+"
+}
+
+BRANCHES=()
+for BRANCH in $(git branch --format "%(refname:short)"); do
+    if [[ $BRANCH =~ $PROTECTED_BRANCHES ]] || [[ $BRANCH == "$DEFAULT_BRANCH" ]]; then
+        continue
+    fi
+
+    if git merge-base --is-ancestor "$BRANCH" "$BASE_BRANCH" || is_squash_merged "$BRANCH"; then
+        BRANCHES+=("$BRANCH")
+    fi
+done
+
+if [[ ${#BRANCHES[@]} -gt 0 ]]; then
     echo "Will remove the following branches:"
     echo
-    echo "$BRANCHES"
+    printf '%s\n' "${BRANCHES[@]}"
     echo
-    echo "Press Enter to delete the above branches, or <ctrl>-c to bail"
-    read -r
 
-    echo "$BRANCHES" | xargs git branch -d
+    if [[ $ASSUME_YES != 1 ]]; then
+        echo "Press Enter to delete the above branches, or <ctrl>-c to bail"
+        read -r
+    fi
+
+    # Git refuses to delete the branch you are standing on.
+    if [[ " ${BRANCHES[*]} " == *" $(git branch --show-current) "* ]]; then
+        git switch "$DEFAULT_BRANCH"
+    fi
+
+    # -D rather than -d, because squash-merged branches are not ancestors of the base branch and
+    # git would refuse to delete them. is_squash_merged has already confirmed the work landed.
+    git branch -D "${BRANCHES[@]}"
 
     echo "Done."
 else
-    echo "No local branches needing"
+    echo "No local branches need removing"
 fi
 
 echo
