@@ -2,4 +2,134 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-exec aws-vault exec devsoc-tofu -- tofu "$@"
+# help: Run tofu with the devsoc-tofu AWS profile, and manage project env vars
+#
+# Usage:
+#   dev tofu <tofu arguments>          Run tofu, initialising the directory first if needed
+#   dev tofu all <tofu arguments>      Run tofu in every project directory, one at a time
+#   dev tofu env                       List the project's env vars and their values
+#   dev tofu env NAME                  Print the value of a single env var
+#   dev tofu env set NAME [VALUE]      Create or replace an env var, prompting if no value given
+#
+# Env vars live in the tofu state as "random_password" resources declared in the project's
+# envvars.tf, so "env set" removes and re-imports the resource rather than applying a change.
+# A "dev tofu apply" is still needed afterwards to get the new value onto the running service.
+#
+# Set $AWS_VAULT_PROFILE to use a profile other than devsoc-tofu. Use "tofu -help" for tofu's own
+# help, as "--help" is handled here.
+
+if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
+PROFILE="${AWS_VAULT_PROFILE:-devsoc-tofu}"
+
+tofu_exec() {
+    aws-vault exec "$PROFILE" -- tofu "$@"
+}
+
+ensure_initialised() {
+    if [ ! -d .terraform ]; then
+        echo "No .terraform directory found - running 'tofu init' first."
+        tofu_exec init
+    fi
+}
+
+# Env vars are named in upper case, which is what separates them from the random_password
+# resources tofu uses internally for things like database passwords.
+# ponytail: naming convention, not a real marker. Tag the resources if it ever mis-sorts one.
+env_list() {
+    tofu_exec show -json | jq -r '
+        .values.root_module.resources[]
+        | select(.type == "random_password")
+        | select(.name | test("^[A-Z][A-Z0-9_]*$"))
+        | "\(.name)=\(.values.result)"
+    '
+}
+
+env_get() {
+    local name="$1"
+    local value
+
+    value=$(env_list | sed -n -e "s/^$name=//p")
+
+    if [ -z "$value" ]; then
+        echo "No env var called '$name' in this project's state." >&2
+        exit 1
+    fi
+
+    echo "$value"
+}
+
+env_set() {
+    local name="$1"
+    local value="${2:-}"
+
+    if [ -z "$value" ]; then
+        read -r -s -p "Value for $name: " value
+        echo
+    fi
+
+    # A variable already in the state has to be removed before it can be re-imported.
+    if tofu_exec state list "random_password.$name" 2>/dev/null | grep -q .; then
+        tofu_exec state rm "random_password.$name"
+    fi
+
+    tofu_exec import "random_password.$name" "$value"
+
+    echo
+    echo "Imported $name. Run 'dev tofu apply' to roll it out."
+}
+
+run_env_command() {
+    ensure_initialised
+
+    local action="${1:-}"
+
+    case "$action" in
+    "")
+        env_list
+        ;;
+    set)
+        if [ $# -lt 2 ]; then
+            echo "Usage: dev tofu env set NAME [VALUE]" >&2
+            exit 1
+        fi
+        env_set "$2" "${3:-}"
+        ;;
+    *)
+        env_get "$action"
+        ;;
+    esac
+}
+
+run_in_every_project() {
+    # Projects are the directories holding their own tofu.tf, which is what allthetofu.sh used to
+    # find. Run them one at a time so apply's confirmation prompts stay readable.
+    local project
+
+    for project in */; do
+        if [ ! -f "$project/tofu.tf" ]; then
+            continue
+        fi
+
+        echo "=== ${project%/} ==="
+        (cd "$project" && ensure_initialised && tofu_exec "$@")
+        echo
+    done
+}
+
+case "${1:-}" in
+env)
+    shift
+    run_env_command "$@"
+    ;;
+all)
+    shift
+    run_in_every_project "$@"
+    ;;
+*)
+    ensure_initialised
+    exec aws-vault exec "$PROFILE" -- tofu "$@"
+    ;;
+esac
