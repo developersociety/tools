@@ -1,20 +1,50 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 IFS=$'\n\t'
 
+# help: Mirror a repo to the archive server, then archive it on GitHub
+#
+# Usage:
+#   dev archive-repo [org/]repo
+#
+# Mirrors every branch and tag to the archive server, then archives the repo on GitHub, which
+# makes it read-only. A repo name given without an org is assumed to be under developersociety.
+
+if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
+DEFAULT_ORG="developersociety"
+ARCHIVE_HOST="smirkenorff.devsoc.org"
+
 if [ $# != 1 ]; then
-    echo "Must specify repo name to clone"
+    echo "Usage: dev archive-repo [org/]repo"
     exit 1
 fi
 
-GIT_REPO=$1
+# Handle org/repo, and repo
+if [[ $1 == *"/"* ]]; then
+    REPO_NAME="$1"
+else
+    REPO_NAME="$DEFAULT_ORG/$1"
+fi
+PROJECT_NAME="${REPO_NAME##*/}"
 
-echo "Archiving ${GIT_REPO}"
+echo "I'm going to mirror: $REPO_NAME"
+echo "To the archive server: $ARCHIVE_HOST"
+echo "And then archive it on GitHub, which makes it read-only."
+echo
+echo "Press Enter to continue, or <ctrl>-c to bail"
+read -r
 
 TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
 
-cd "$TMPDIR"
-git clone --bare "git@github.com:developersociety/${GIT_REPO}.git"
-cd "${GIT_REPO}.git"
-git push --mirror "git@smirkenorff.devsoc.org:archive/${GIT_REPO}.git"
-rm -rf "$TMPDIR"
+CLONE_DIR="$TMPDIR/$PROJECT_NAME.git"
+
+git clone --bare "git@github.com:$REPO_NAME.git" "$CLONE_DIR"
+git -C "$CLONE_DIR" push --mirror "git@$ARCHIVE_HOST:archive/$PROJECT_NAME.git"
+
+gh repo archive "$REPO_NAME" --yes
+
+echo "Done - $REPO_NAME is mirrored and archived."
