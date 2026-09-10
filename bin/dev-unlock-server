@@ -2,15 +2,71 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-if [[ $# -ne 1 ]]; then
-    echo "Usage: dev-unlock-server hostname.devsoc.org" >&2
+# help: Unlock the encrypted root filesystem on one or more servers
+#
+# Usage:
+#   dev unlock-server hostname.devsoc.org [hostname.devsoc.org ...]
+#
+# Reads each server's passphrase from 1Password and sends it to the initramfs SSH server, then
+# waits for the machine to finish booting before moving on to the next one. Set
+# $DEV_UNLOCK_TIMEOUT to wait longer than the default 180 seconds for a slow server.
+
+if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
+OP_VAULT="aizi3l3vxjc52mboshwj7bbytq"
+KNOWN_HOSTS_FILE="$HOME/.ssh/known_hosts.cryptroot-unlock"
+BOOT_TIMEOUT_SECONDS="${DEV_UNLOCK_TIMEOUT:-180}"
+BOOT_POLL_SECONDS=5
+
+if [ $# -lt 1 ]; then
+    echo "Usage: dev unlock-server hostname.devsoc.org [hostname.devsoc.org ...]"
     exit 1
 fi
-HOST="$1"
 
-LUKS_PASSPHRASE=$(op read "op://aizi3l3vxjc52mboshwj7bbytq/$HOST/password")
-echo -n "$LUKS_PASSPHRASE" | \
-    ssh -o UserKnownHostsFile="$HOME/.ssh/known_hosts.cryptroot-unlock" \
-        -o StrictHostKeyChecking=accept-new \
-        -o BatchMode=yes \
-        "root@$HOST" cryptroot-unlock
+if ! op account get >/dev/null 2>&1; then
+    echo "1Password CLI not usable. Install it with 'brew install --cask 1password-cli',"
+    echo "or sign in with: eval \$(op signin)"
+    exit 1
+fi
+
+send_passphrase() {
+    local host="$1"
+    local passphrase
+    passphrase=$(op read "op://$OP_VAULT/$host/password")
+
+    # The initramfs SSH server has its own host key, so it gets its own known_hosts file.
+    echo -n "$passphrase" |
+        ssh -o UserKnownHostsFile="$KNOWN_HOSTS_FILE" \
+            -o StrictHostKeyChecking=accept-new \
+            -o BatchMode=yes \
+            "root@$host" cryptroot-unlock
+}
+
+wait_for_boot() {
+    # The initramfs SSH server disappears the moment the disk unlocks, so reaching the real host's
+    # SSH is what actually confirms the machine finished booting.
+    local host="$1"
+    local deadline=$((SECONDS + BOOT_TIMEOUT_SECONDS))
+
+    while [ $SECONDS -lt $deadline ]; do
+        if ssh -o BatchMode=yes -o ConnectTimeout=5 "$host" true 2>/dev/null; then
+            return 0
+        fi
+        sleep "$BOOT_POLL_SECONDS"
+    done
+
+    return 1
+}
+
+for HOST in "$@"; do
+    echo "Unlocking $HOST..."
+    send_passphrase "$HOST"
+
+    if wait_for_boot "$HOST"; then
+        echo "$HOST is up."
+    else
+        echo "$HOST did not come back within ${BOOT_TIMEOUT_SECONDS}s - check it manually." >&2
+    fi
+done
