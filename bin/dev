@@ -21,7 +21,7 @@ usage() {
     echo
     echo "Commands:"
     for script in "$BINDIR"/dev-*; do
-        [[ -x $script ]] || continue
+        [ -x "$script" ] || continue
         printf "  %-18s %s\n" "${script##*/dev-}" "$(doc_block "$script" | head -n 1)"
     done
     echo
@@ -39,7 +39,7 @@ command_help() {
     local name="$1"
     local script="$BINDIR/dev-$name"
 
-    if [[ ! -x $script ]]; then
+    if [ ! -x "$script" ]; then
         die_unknown "$name"
     fi
 
@@ -54,7 +54,7 @@ case "$SUBCOMMAND" in
     exit 0
     ;;
 help)
-    if [[ -n ${2:-} ]]; then
+    if [ -n "${2:-}" ]; then
         command_help "$2"
     else
         usage
@@ -66,7 +66,7 @@ esac
 shift
 COMMAND="$BINDIR/dev-$SUBCOMMAND"
 
-if [[ ! -x $COMMAND ]]; then
+if [ ! -x "$COMMAND" ]; then
     die_unknown "$SUBCOMMAND"
 fi
 

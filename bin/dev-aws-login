@@ -9,7 +9,7 @@ IFS=$'\n\t'
 #
 # Defaults to the profile in $AWS_VAULT_PROFILE, or "devsoc".
 
-if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 

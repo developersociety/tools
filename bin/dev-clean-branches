@@ -11,20 +11,20 @@ IFS=$'\n\t'
 # are found too, which "git branch --merged" cannot do on its own. main, master, dev and the
 # repo's own default branch are never deleted.
 
-if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 
 PROTECTED_BRANCHES="^main$|^master$|^dev$"
 
 ASSUME_YES=0
-if [[ ${1:-} == "-y" || ${1:-} == "--yes" ]]; then
+if [ "${1:-}" = "-y" ] || [ "${1:-}" = "--yes" ]; then
     ASSUME_YES=1
 fi
 
 # If the remote repo was added without the usual clone, then HEAD might be missing. A quick fix
 # can restore HEAD to the expected branch.
-if [[ ! -f .git/refs/remotes/origin/HEAD ]]; then
+if [ ! -f .git/refs/remotes/origin/HEAD ]; then
     git remote set-head origin --auto >/dev/null
 fi
 
@@ -57,13 +57,13 @@ for BRANCH in $(git branch --format "%(refname:short)"); do
     fi
 done
 
-if [[ ${#BRANCHES[@]} -gt 0 ]]; then
+if [ "${#BRANCHES[@]}" -gt 0 ]; then
     echo "Will remove the following branches:"
     echo
     printf '%s\n' "${BRANCHES[@]}"
     echo
 
-    if [[ $ASSUME_YES != 1 ]]; then
+    if [ "$ASSUME_YES" -ne 1 ]; then
         echo "Press Enter to delete the above branches, or <ctrl>-c to bail"
         read -r
     fi

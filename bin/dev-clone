@@ -14,19 +14,19 @@ IFS=$'\n\t'
 # --vscode also writes a .code-workspace file pointing at the project's interpreter, and hides it
 # from git.
 
-if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 
 DEFAULT_ORG="developersociety"
 
 MAKE_VSCODE_WORKSPACE=0
-if [[ ${1:-} == "--vscode" ]]; then
+if [ "${1:-}" = "--vscode" ]; then
     MAKE_VSCODE_WORKSPACE=1
     shift
 fi
 
-if [ $# != 1 ]; then
+if [ "$#" -ne 1 ]; then
     echo "Usage: dev clone [--vscode] [org/]repo"
     exit 1
 fi

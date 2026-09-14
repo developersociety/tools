@@ -18,7 +18,7 @@ IFS=$'\n\t'
 # Set $AWS_VAULT_PROFILE to use a profile other than devsoc-tofu. Use "tofu -help" for tofu's own
 # help, as "--help" is handled here.
 
-if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 

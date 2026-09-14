@@ -10,7 +10,7 @@ IFS=$'\n\t'
 # Shows a diff and asks before replacing anything. The username defaults to $USER, and the last
 # 5 backups are kept alongside the config.
 
-if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 

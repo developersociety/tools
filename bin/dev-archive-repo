@@ -10,14 +10,14 @@ IFS=$'\n\t'
 # Mirrors every branch and tag to the archive server, then archives the repo on GitHub, which
 # makes it read-only. A repo name given without an org is assumed to be under developersociety.
 
-if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 
 DEFAULT_ORG="developersociety"
 ARCHIVE_HOST="smirkenorff.devsoc.org"
 
-if [ $# != 1 ]; then
+if [ "$#" -ne 1 ]; then
     echo "Usage: dev archive-repo [org/]repo"
     exit 1
 fi

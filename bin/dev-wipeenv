@@ -9,7 +9,7 @@ IFS=$'\n\t'
 #
 # Lists what it is about to remove and asks first. pip, setuptools and wheel are left alone.
 
-if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 

@@ -11,7 +11,7 @@ IFS=$'\n\t'
 # waits for the machine to finish booting before moving on to the next one. Set
 # $DEV_UNLOCK_TIMEOUT to wait longer than the default 180 seconds for a slow server.
 
-if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 
