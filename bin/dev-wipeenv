@@ -34,7 +34,6 @@ echo "Will uninstall the following from $VIRTUAL_ENV:"
 echo
 echo "$PACKAGES"
 echo
-echo "Press Enter to uninstall the above packages, or <ctrl>-c to bail"
-read -r
+read -r -p "Press Enter to uninstall the above packages, or <ctrl>-c to bail"
 
 echo "$PACKAGES" | xargs pip uninstall -y

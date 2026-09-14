@@ -34,8 +34,7 @@ echo "I'm going to mirror: $REPO_NAME"
 echo "To the archive server: $ARCHIVE_HOST"
 echo "And then archive it on GitHub, which makes it read-only."
 echo
-echo "Press Enter to continue, or <ctrl>-c to bail"
-read -r
+read -r -p "Press Enter to continue, or <ctrl>-c to bail"
 
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT

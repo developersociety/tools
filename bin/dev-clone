@@ -107,8 +107,7 @@ echo "I'm going to clone: $GIT_URI"
 echo "Into this directory: $PROJECT_DIR"
 echo "And setup virtualenvwrapper for you."
 echo
-echo "Press Enter to continue..."
-read -r
+read -r -p "Press Enter to continue..."
 
 git clone "$GIT_URI" "$PROJECT_DIR"
 cd "$PROJECT_DIR"

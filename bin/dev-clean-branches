@@ -64,8 +64,7 @@ if [ "${#BRANCHES[@]}" -gt 0 ]; then
     echo
 
     if [ "$ASSUME_YES" -ne 1 ]; then
-        echo "Press Enter to delete the above branches, or <ctrl>-c to bail"
-        read -r
+        read -r -p "Press Enter to delete the above branches, or <ctrl>-c to bail"
     fi
 
     # Git refuses to delete the branch you are standing on.
