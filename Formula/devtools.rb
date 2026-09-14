@@ -16,7 +16,6 @@ class Devtools < Formula
   version "1.0.0"
 
   depends_on "aws-vault"
-  depends_on "awscli"
   depends_on "gh"
   depends_on "jq"
   depends_on "opentofu"
