@@ -5,54 +5,32 @@ IFS=$'\n\t'
 # help: Rewrite ~/.aws/config from the 1Password template
 #
 # Usage:
-#   dev update-aws-config [username]
+#   dev update-aws-config username
 #
-# Shows a diff and asks before replacing anything. The username defaults to $USER, and the last
-# 5 backups are kept alongside the config.
+# The existing config is moved aside with a timestamped name before the new one is written.
 
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 
-BACKUPS_TO_KEEP=5
 CONFIG_FILE="$HOME/.aws/config"
 
-CONFIG_USERNAME="${1:-$USER}"
-
-if ! op account get >/dev/null 2>&1; then
-    echo "1Password CLI not usable. Install it with 'brew install --cask 1password-cli',"
-    echo "or sign in with: eval \$(op signin)"
+if [ "$#" -ne 1 ]; then
+    echo "Usage: dev update-aws-config username"
     exit 1
 fi
 
+CONFIG_USERNAME="$1"
+
 mkdir -p "$HOME/.aws"
 
-# Render to a temporary file first, so a failed "op read" can't leave you with no config at all.
-TMPFILE=$(mktemp)
-trap 'rm -f "$TMPFILE"' EXIT
-
-op read "op://Shared/AWS Config Template/notesPlain" |
-    sed -e "s|USERNAME|$CONFIG_USERNAME|g" >"$TMPFILE"
-
 if [ -f "$CONFIG_FILE" ]; then
-    if diff -u "$CONFIG_FILE" "$TMPFILE"; then
-        echo "Config is already up to date for '$CONFIG_USERNAME'."
-        exit 0
-    fi
-
-    echo
-    read -r -p "Press Enter to apply the above changes for '$CONFIG_USERNAME', or <ctrl>-c to bail"
-
     TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
-    cp "$CONFIG_FILE" "$CONFIG_FILE.old.$TIMESTAMP"
     echo "Backup of existing config saved to: $CONFIG_FILE.old.$TIMESTAMP"
+    mv "$CONFIG_FILE" "$CONFIG_FILE.old.$TIMESTAMP"
 fi
 
-mv "$TMPFILE" "$CONFIG_FILE"
-
-# Backups otherwise accumulate forever, one per run.
-{ ls -1t "$CONFIG_FILE".old.* 2>/dev/null || true; } |
-    tail -n +$((BACKUPS_TO_KEEP + 1)) |
-    xargs rm -f
+op read "op://Shared/AWS Config Template/notesPlain" |
+    sed -e "s|USERNAME|$CONFIG_USERNAME|g" >"$CONFIG_FILE"
 
 echo "Config file updated!"

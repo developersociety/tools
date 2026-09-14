@@ -2,14 +2,13 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# help: Delete merged local branches, including squash-merged ones, and prune remotes
+# help: Delete merged local branches and prune remotes
 #
 # Usage:
 #   dev clean-branches
 #
-# Deletes local branches whose changes have landed on the default branch. Squash-merged branches
-# are found too, which "git branch --merged" cannot do on its own. main, master, dev and the
-# repo's own default branch are never deleted.
+# Deletes local branches which have been merged into the default branch. main, master, dev and
+# the repo's own default branch are never deleted.
 
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
@@ -25,31 +24,15 @@ fi
 
 DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed -e "s|^refs/remotes/origin/||")
 
-# Compare against the remote branch rather than the local one, which may be stale or absent.
-BASE_BRANCH="origin/$DEFAULT_BRANCH"
-
-is_squash_merged() {
-    # A squash-merge leaves no ancestry behind, so "git branch --merged" cannot see it. Replaying
-    # the branch's tree as a single commit on top of the merge base gives git something it can
-    # recognise: if that commit is already present in the base branch, the changes have landed.
-    local branch="$1"
-    local merge_base squashed
-
-    merge_base=$(git merge-base "$BASE_BRANCH" "$branch")
-    squashed=$(git commit-tree "$branch^{tree}" -p "$merge_base" -m "squash-merge check")
-
-    ! git cherry "$BASE_BRANCH" "$squashed" | grep -q "^+"
-}
-
+# Collecting the branches into an array rather than filtering with grep, which exits non-zero
+# when everything has been filtered out and takes the whole script down with it.
 BRANCHES=()
-for BRANCH in $(git branch --format "%(refname:short)"); do
+for BRANCH in $(git branch --merged "$DEFAULT_BRANCH" --format "%(refname:short)"); do
     case " $PROTECTED_BRANCHES $DEFAULT_BRANCH " in
     *" $BRANCH "*) continue ;;
     esac
 
-    if git merge-base --is-ancestor "$BRANCH" "$BASE_BRANCH" || is_squash_merged "$BRANCH"; then
-        BRANCHES+=("$BRANCH")
-    fi
+    BRANCHES+=("$BRANCH")
 done
 
 if [ "${#BRANCHES[@]}" -gt 0 ]; then
@@ -57,17 +40,9 @@ if [ "${#BRANCHES[@]}" -gt 0 ]; then
     echo
     printf '%s\n' "${BRANCHES[@]}"
     echo
-
     read -r -p "Press Enter to delete the above branches, or <ctrl>-c to bail"
 
-    # Git refuses to delete the branch you are standing on.
-    case " ${BRANCHES[*]} " in
-    *" $(git branch --show-current) "*) git switch "$DEFAULT_BRANCH" ;;
-    esac
-
-    # -D rather than -d, because squash-merged branches are not ancestors of the base branch and
-    # git would refuse to delete them. is_squash_merged has already confirmed the work landed.
-    git branch -D "${BRANCHES[@]}"
+    git branch -d "${BRANCHES[@]}"
 
     echo "Done."
 else

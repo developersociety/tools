@@ -2,50 +2,35 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# help: Mirror a repo to the archive server, then archive it on GitHub
+# help: Mirror a repo to the archive server
 #
 # Usage:
-#   dev archive-repo [org/]repo
+#   dev archive-repo repo
 #
-# Mirrors every branch and tag to the archive server, then archives the repo on GitHub, which
-# makes it read-only. A repo name given without an org is assumed to be under developersociety.
+# Mirrors every branch and tag of a developersociety repo to the archive server.
 
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 
-DEFAULT_ORG="developersociety"
+ORG="developersociety"
 ARCHIVE_HOST="smirkenorff.devsoc.org"
 
 if [ "$#" -ne 1 ]; then
-    echo "Usage: dev archive-repo [org/]repo"
+    echo "Usage: dev archive-repo repo"
     exit 1
 fi
 
-# Handle org/repo, and repo
 REPO_ARG="$1"
-case "$REPO_ARG" in
-*/*) REPO_NAME="$REPO_ARG" ;;
-*) REPO_NAME="$DEFAULT_ORG/$REPO_ARG" ;;
-esac
-PROJECT_NAME="${REPO_NAME##*/}"
 
-echo "I'm going to mirror: $REPO_NAME"
-echo "To the archive server: $ARCHIVE_HOST"
-echo "And then archive it on GitHub, which makes it read-only."
-echo
-read -r -p "Press Enter to continue, or <ctrl>-c to bail"
+echo "Archiving $REPO_ARG"
 
 # Not $TMPDIR - that is the standard var mktemp and git read, and clobbering it would move
 # everyone else's temporary files in here too.
 WORK_DIR=$(mktemp -d)
 trap 'rm -rf "$WORK_DIR"' EXIT
 
-CLONE_DIR="$WORK_DIR/$PROJECT_NAME.git"
+CLONE_DIR="$WORK_DIR/$REPO_ARG.git"
 
-git clone --bare "git@github.com:$REPO_NAME.git" "$CLONE_DIR"
-git -C "$CLONE_DIR" push --mirror "git@$ARCHIVE_HOST:archive/$PROJECT_NAME.git"
-
-gh repo archive "$REPO_NAME" --yes
-
-echo "Done - $REPO_NAME is mirrored and archived."
+git clone --bare "git@github.com:$ORG/$REPO_ARG.git" "$CLONE_DIR"
+git -C "$CLONE_DIR" push --mirror "git@$ARCHIVE_HOST:archive/$REPO_ARG.git"

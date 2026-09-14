@@ -2,7 +2,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# dev-aws-login only picks a profile, but getting that wrong logs you into the wrong AWS account.
+# dev-aws-login only hands its arguments to aws-vault, but getting that wrong logs you into the
+# wrong AWS account.
 
 BINDIR="$(cd "$(dirname "$0")/../bin" && pwd)"
 # shellcheck source=tests/helpers.sh
@@ -16,17 +17,7 @@ set -euo pipefail
 echo "$*"
 STUB
 
-expect "no arguments uses the default profile" \
-    "login -- devsoc" "$(
-        unset AWS_VAULT_PROFILE
-        "$BINDIR/dev" aws-login
-    )"
+expect "the profile is passed through to aws-vault" \
+    "login -- someprofile" "$("$BINDIR/dev" aws-login someprofile)"
 
-expect "AWS_VAULT_PROFILE overrides the default" \
-    "login -- someotherprofile" "$(AWS_VAULT_PROFILE=someotherprofile "$BINDIR/dev" aws-login)"
-
-expect "an explicit profile wins over everything" \
-    "login -- explicitprofile" \
-    "$(AWS_VAULT_PROFILE=someotherprofile "$BINDIR/dev" aws-login explicitprofile)"
-
-finish "the right aws-vault profile is chosen"
+finish "the profile reaches aws-vault untouched"

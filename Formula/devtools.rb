@@ -17,8 +17,6 @@ class Devtools < Formula
   version "1.0.0"
 
   depends_on "aws-vault"
-  depends_on "gh"
-  depends_on "jq"
   depends_on "opentofu"
 
   # The 1Password CLI is a cask, which formulae can't depend on, and pyenv/virtualenvwrapper are

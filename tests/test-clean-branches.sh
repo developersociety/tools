@@ -2,9 +2,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Checks that dev-clean-branches deletes merged and squash-merged branches while leaving
-# unmerged and protected ones alone. Squash-merge detection is the only non-obvious logic in
-# these tools, and it silently does nothing when it breaks.
+# Checks that dev-clean-branches deletes merged branches while leaving unmerged and protected
+# ones alone, and that a repo with nothing to delete says so rather than falling over.
 
 CLEAN_BRANCHES="$(cd "$(dirname "$0")/../bin" && pwd)/dev-clean-branches"
 # shellcheck source=tests/helpers.sh
@@ -29,13 +28,6 @@ echo "merged" >merged.txt
 git add merged.txt
 git commit --quiet -m "Merged work"
 
-git switch --quiet -c squashed-branch main
-echo "squashed one" >squashed.txt
-git add squashed.txt
-git commit --quiet -m "Squashed work, part one"
-echo "squashed two" >>squashed.txt
-git commit --quiet -am "Squashed work, part two"
-
 git switch --quiet -c unmerged-branch main
 echo "unmerged" >unmerged.txt
 git add unmerged.txt
@@ -43,21 +35,18 @@ git commit --quiet -m "Unmerged work"
 
 git switch --quiet main
 git merge --quiet --no-ff -m "Merge merged-branch" merged-branch >/dev/null
-git merge --quiet --squash squashed-branch >/dev/null 2>&1
-git commit --quiet -m "Squash merge of squashed-branch"
 git push --quiet origin main
 
 printf '\n' | "$CLEAN_BRANCHES" >/dev/null
 
-expect "merged and squash-merged branches go, the unmerged one stays" \
+expect "the merged branch goes, the unmerged one stays" \
     "main unmerged-branch " "$(git branch --format "%(refname:short)" | sort | tr '\n' ' ')"
 
 # A second run has nothing to delete, which used to abort the script when grep found no matches.
-git switch --quiet main
 git branch --quiet -D unmerged-branch
 SECOND_RUN=$(printf '\n' | "$CLEAN_BRANCHES")
 
 expect_contains "expected a clean repo to report nothing to remove" \
     "$SECOND_RUN" "No local branches need removing"
 
-finish "merged and squash-merged branches removed, and a clean repo says so"
+finish "merged branches removed, protected ones kept, and a clean repo says so"

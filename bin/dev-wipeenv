@@ -7,7 +7,7 @@ IFS=$'\n\t'
 # Usage:
 #   dev wipeenv
 #
-# Lists what it is about to remove and asks first. pip, setuptools and wheel are left alone.
+# pip, setuptools and wheel are left alone.
 
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
@@ -23,17 +23,7 @@ fi
 #
 # Need to make sure not to uninstall pip itself. List of things to avoid comes from docs for
 # "pip freeze --all"
-PACKAGES=$(pip list --format=freeze | grep -v "^pip=\|^setuptools=\|^wheel=" || true)
-
-if [ -z "$PACKAGES" ]; then
+if ! pip list --format=freeze | grep -v "^pip=\|^setuptools=\|^wheel=" |
+    xargs pip uninstall -y; then
     echo "Nothing to remove"
-    exit 0
 fi
-
-echo "Will uninstall the following from $VIRTUAL_ENV:"
-echo
-echo "$PACKAGES"
-echo
-read -r -p "Press Enter to uninstall the above packages, or <ctrl>-c to bail"
-
-echo "$PACKAGES" | xargs pip uninstall -y

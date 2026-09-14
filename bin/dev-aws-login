@@ -5,14 +5,12 @@ IFS=$'\n\t'
 # help: Open the AWS console via aws-vault
 #
 # Usage:
-#   dev aws-login [profile]
+#   dev aws-login <profile>
 #
-# Defaults to the profile in $AWS_VAULT_PROFILE, or "devsoc".
+# Arguments are passed straight through to "aws-vault login".
 
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 
-DEFAULT_PROFILE="${AWS_VAULT_PROFILE:-devsoc}"
-
-exec aws-vault login -- "${@:-$DEFAULT_PROFILE}"
+exec aws-vault login -- "$@"

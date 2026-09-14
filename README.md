@@ -39,19 +39,16 @@ $ dev tofu --help
 
 Each command explains itself, so the list below is a map rather than a manual.
 
-| Command                 | What it does                                                            |
-|-------------------------|-------------------------------------------------------------------------|
-| `dev clone`             | Clone a repo and set up virtualenvwrapper for it                        |
-| `dev clean-branches`    | Delete merged local branches, squash-merges included, and prune remotes |
-| `dev tofu`              | Run tofu with the devsoc-tofu profile, and manage project env vars      |
-| `dev aws-login`         | Open the AWS console via aws-vault                                      |
-| `dev update-aws-config` | Rewrite `~/.aws/config` from the 1Password template                     |
-| `dev unlock-server`     | Unlock the encrypted root filesystem on one or more servers             |
-| `dev archive-repo`      | Mirror a repo to the archive server, then archive it on GitHub          |
-| `dev wipeenv`           | Uninstall every package in the active virtualenv                        |
-
-Managing a project's environment variables has a workflow of its own — see
-[docs/tofu-env.md](docs/tofu-env.md).
+| Command                 | What it does                                        |
+|-------------------------|-----------------------------------------------------|
+| `dev clone`             | Clone a repo and set up virtualenvwrapper for it    |
+| `dev clean-branches`    | Delete merged local branches and prune remotes      |
+| `dev tofu`              | Run tofu with the devsoc-tofu profile               |
+| `dev aws-login`         | Open the AWS console via aws-vault                  |
+| `dev update-aws-config` | Rewrite `~/.aws/config` from the 1Password template |
+| `dev unlock-server`     | Unlock the encrypted root filesystem on a server    |
+| `dev archive-repo`      | Mirror a repo to the archive server                 |
+| `dev wipeenv`           | Uninstall every package in the active virtualenv    |
 
 ## Development
 
