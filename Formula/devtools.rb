@@ -1,11 +1,11 @@
+# The tap and the tools are the same repo, so the scripts are already on disk next to this
+# formula: Homebrew builds from the tap's own checkout rather than fetching from GitHub again.
+# That also makes testing a branch a matter of checking it out in the tap, with no push needed.
+
 class Devtools < Formula
   desc "Development tools for The Developer Society"
   homepage "https://github.com/developersociety/tools"
 
-  # The tap and the tools are the same repo, so the scripts are already on disk next to this
-  # formula: Homebrew builds from the tap's own checkout rather than fetching from GitHub again.
-  # That also makes testing a branch a matter of checking it out in the tap, with no push needed.
-  #
   # A pinned revision would need a second commit after every tag, so the version is what Homebrew
   # keys its cache on: bump it to ship a release. While testing a branch, "brew fetch --force
   # devtools" clears the cached clone without a bump.
