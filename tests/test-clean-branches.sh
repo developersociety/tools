@@ -57,8 +57,7 @@ git switch --quiet main
 git branch --quiet -D unmerged-branch
 SECOND_RUN=$("$CLEAN_BRANCHES" --yes)
 
-if [[ $SECOND_RUN != *"No local branches need removing"* ]]; then
-    fail "expected a clean repo to report nothing to remove, got: $SECOND_RUN"
-fi
+expect_contains "expected a clean repo to report nothing to remove" \
+    "$SECOND_RUN" "No local branches need removing"
 
 finish "merged and squash-merged branches removed, and a clean repo says so"

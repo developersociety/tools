@@ -31,6 +31,17 @@ expect() {
     fi
 }
 
+# Checks for a substring, which is what most of the output assertions here need: the tests care
+# that a message appeared, not that the whole output matched.
+expect_contains() {
+    local description="$1" haystack="$2" needle="$3"
+
+    case "$haystack" in
+    *"$needle"*) ;;
+    *) fail "$description, got: $haystack" ;;
+    esac
+}
+
 fail() {
     echo "FAIL: $1"
     FAILED=1

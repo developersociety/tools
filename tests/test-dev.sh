@@ -33,26 +33,23 @@ chmod +x "$BINDIR/dev-madeupcommand"
 expect "arguments are passed through untouched" \
     "got: --flag one two" "$("$BINDIR/dev" madeupcommand --flag one two)"
 
-if [[ $("$BINDIR/dev" help) != *"madeupcommand"* ]]; then
-    fail "a newly added command should appear in 'dev help' without being registered"
-fi
+expect_contains "a newly added command should appear in 'dev help' without being registered" \
+    "$("$BINDIR/dev" help)" "madeupcommand"
 
 expect "commands are also runnable directly, without the dispatcher" \
     "got: direct" "$("$BINDIR/dev-madeupcommand" direct)"
 
 for INVOCATION in "" "-h" "--help" "help"; do
-    if [[ $("$BINDIR/dev" ${INVOCATION:+"$INVOCATION"}) != *"Usage: dev <command>"* ]]; then
-        fail "'dev ${INVOCATION}' should print the usage summary"
-    fi
+    expect_contains "'dev ${INVOCATION}' should print the usage summary" \
+        "$("$BINDIR/dev" ${INVOCATION:+"$INVOCATION"})" "Usage: dev <command>"
 done
 
 if "$BINDIR/dev" no-such-command >/dev/null 2>&1; then
     fail "an unknown command should exit non-zero"
 fi
 
-if [[ $("$BINDIR/dev" no-such-command 2>&1 || true) != *"Unknown command: no-such-command"* ]]; then
-    fail "an unknown command should say which one it didn't recognise"
-fi
+expect_contains "an unknown command should say which one it didn't recognise" \
+    "$("$BINDIR/dev" no-such-command 2>&1 || true)" "Unknown command: no-such-command"
 
 if "$BINDIR/dev" help no-such-command >/dev/null 2>&1; then
     fail "'dev help' for an unknown command should exit non-zero"
@@ -70,15 +67,13 @@ for SCRIPT_PATH in "$SOURCE_BINDIR"/dev-*; do
     NAME="${SCRIPT_PATH##*/dev-}"
 
     HELP_OUTPUT=$("$SOURCE_BINDIR/dev" help "$NAME")
-    if [[ $HELP_OUTPUT != *"dev $NAME"* ]]; then
-        fail "'dev help $NAME' doesn't document a 'dev $NAME' usage line"
-    fi
+    expect_contains "'dev help $NAME' doesn't document a 'dev $NAME' usage line" \
+        "$HELP_OUTPUT" "dev $NAME"
 
     expect "'$NAME --help' matches 'dev help $NAME'" "$HELP_OUTPUT" "$("$SCRIPT_PATH" --help)"
 
-    if [[ $("$SOURCE_BINDIR/dev" help) != *"  $NAME "* ]]; then
-        fail "'$NAME' is missing from the 'dev help' summary list"
-    fi
+    expect_contains "'$NAME' is missing from the 'dev help' summary list" \
+        "$("$SOURCE_BINDIR/dev" help)" "  $NAME "
 done
 
 finish "subcommands are discovered, dispatched, and all document themselves"

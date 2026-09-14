@@ -71,8 +71,7 @@ expect "each host is unlocked as root and then checked for boot, in order" \
 OUTPUT=$(DEV_UNLOCK_TIMEOUT=1 STUB_UP_HOSTS="" \
     "$BINDIR/dev" unlock-server slow.example 2>&1 >/dev/null)
 
-if [[ $OUTPUT != *"did not come back"* ]]; then
-    fail "a host which never boots should warn on stderr, got: $OUTPUT"
-fi
+expect_contains "a host which never boots should warn on stderr" \
+    "$OUTPUT" "did not come back"
 
 finish "passphrases fetched per host, unlocked in order, and slow servers warn"
