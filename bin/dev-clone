@@ -1,28 +1,42 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 IFS=$'\n\t'
 
-# shellcheck disable=SC1090
+# help: Clone a repo and set up virtualenvwrapper for it
+#
+# Usage:
+#   dev clone [org/]repo
+#
+# Requires virtualenvwrapper, with $PROJECT_HOME set. A repo name given without an org is assumed
+# to be under developersociety. The Python version comes from tox.ini's basepython.
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
+DEFAULT_ORG="developersociety"
+
+# shellcheck source=/dev/null  # path is set per-machine
 source "$VIRTUALENVWRAPPER_SCRIPT"
 
-if [ $# != 1 ]; then
-    echo "Must specify repo name to clone"
+if [ "$#" -ne 1 ]; then
+    echo "Usage: dev clone [org/]repo"
     exit 1
 fi
 
 # Handle org/repo, and repo
-if [[ $1 == *"/"* ]]; then
-    REPO_NAME="$1"
-    PROJECT_NAME="${1##*/}"
-else
-    REPO_NAME="developersociety/$1"
-    PROJECT_NAME="$1"
-fi
+REPO_ARG="$1"
+case "$REPO_ARG" in
+*/*) REPO_NAME="$REPO_ARG" ;;
+*) REPO_NAME="$DEFAULT_ORG/$REPO_ARG" ;;
+esac
 
+PROJECT_NAME="${REPO_NAME##*/}"
 GIT_URI="git@github.com:$REPO_NAME.git"
+# shellcheck disable=SC2153  # PROJECT_HOME is virtualenvwrapper's, not a typo of PROJECT_NAME
 PROJECT_DIR="$PROJECT_HOME/$PROJECT_NAME"
 
-if [ -a "$PROJECT_DIR" ]; then
+if [ -e "$PROJECT_DIR" ]; then
     echo "Target directory already exists:"
     echo "  $PROJECT_DIR"
     exit 1
@@ -32,26 +46,28 @@ echo "I'm going to clone: $GIT_URI"
 echo "Into this directory: $PROJECT_DIR"
 echo "And setup virtualenvwrapper for you."
 echo
-echo "Press Enter to continue..."
-read -r
+read -r -p "Press Enter to continue..."
 
-mkdir "$PROJECT_DIR"
+git clone "$GIT_URI" "$PROJECT_DIR"
 cd "$PROJECT_DIR"
-git clone "$GIT_URI" .
 
 # mkproject fails with super strict mode - so we need to allow unbound variables at this point
 set +u
 
-if grep --fixed-strings --silent "basepython" tox.ini;
-then
-    PYTHON_VERSION=$(sed -e 's/basepython[[:space:]]=[[:space:]]//' -e 'tx' -e 'd' -e ':x' tox.ini | head -n 1)
-    PYTHON_VERSION_NUMBER=${PYTHON_VERSION/python/}
-    LATEST_PYTHON=$(pyenv latest "$PYTHON_VERSION_NUMBER")
+# The -f test only stops grep complaining about a missing tox.ini - a repo without one takes the
+# same branch either way.
+if [ -f tox.ini ] && grep --fixed-strings --silent "basepython" tox.ini; then
+    PYTHON_VERSION=$(sed -n -e 's/^[[:space:]]*basepython[[:space:]]*=[[:space:]]*//p' tox.ini |
+        head -n 1)
+    LATEST_PYTHON=$(pyenv latest "${PYTHON_VERSION#python}")
     VIRTUALENV_EXE=$(PYENV_VERSION=$LATEST_PYTHON pyenv which virtualenv)
-    VIRTUALENVWRAPPER_VIRTUALENV=$VIRTUALENV_EXE mkproject --force --python="$PYTHON_VERSION" "$PROJECT_NAME"
+    VIRTUALENVWRAPPER_VIRTUALENV=$VIRTUALENV_EXE mkproject --force --python="$PYTHON_VERSION" \
+        "$PROJECT_NAME"
 else
     mkproject --force "$PROJECT_NAME"
 fi
 
+set -u
+
 echo
-echo "Done - to active this project: workon $PROJECT_NAME"
+echo "Done - to activate this project: workon $PROJECT_NAME"

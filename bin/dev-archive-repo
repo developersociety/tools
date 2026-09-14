@@ -1,20 +1,36 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 IFS=$'\n\t'
 
-if [ $# != 1 ]; then
-    echo "Must specify repo name to clone"
+# help: Mirror a repo to the archive server
+#
+# Usage:
+#   dev archive-repo repo
+#
+# Mirrors every branch and tag of a developersociety repo to the archive server.
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
+ORG="developersociety"
+ARCHIVE_HOST="smirkenorff.devsoc.org"
+
+if [ "$#" -ne 1 ]; then
+    echo "Usage: dev archive-repo repo"
     exit 1
 fi
 
-GIT_REPO=$1
+REPO_ARG="$1"
 
-echo "Archiving ${GIT_REPO}"
+echo "Archiving $REPO_ARG"
 
-TMPDIR=$(mktemp -d)
+# Not $TMPDIR - that is the standard var mktemp and git read, and clobbering it would move
+# everyone else's temporary files in here too.
+WORK_DIR=$(mktemp -d)
+trap 'rm -rf "$WORK_DIR"' EXIT
 
-cd "$TMPDIR"
-git clone --bare "git@github.com:developersociety/${GIT_REPO}.git"
-cd "${GIT_REPO}.git"
-git push --mirror "git@smirkenorff.devsoc.org:archive/${GIT_REPO}.git"
-rm -rf "$TMPDIR"
+CLONE_DIR="$WORK_DIR/$REPO_ARG.git"
+
+git clone --bare "git@github.com:$ORG/$REPO_ARG.git" "$CLONE_DIR"
+git -C "$CLONE_DIR" push --mirror "git@$ARCHIVE_HOST:archive/$REPO_ARG.git"

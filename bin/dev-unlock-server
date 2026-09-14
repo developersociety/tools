@@ -2,15 +2,32 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-if [[ $# -ne 1 ]]; then
-    echo "Usage: dev-unlock-server hostname.devsoc.org" >&2
+# help: Unlock the encrypted root filesystem on a server
+#
+# Usage:
+#   dev unlock-server hostname.devsoc.org
+#
+# Reads the server's passphrase from 1Password and sends it to the initramfs SSH server.
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
+OP_VAULT="aizi3l3vxjc52mboshwj7bbytq"
+KNOWN_HOSTS_FILE="$HOME/.ssh/known_hosts.cryptroot-unlock"
+
+if [ "$#" -ne 1 ]; then
+    echo "Usage: dev unlock-server hostname.devsoc.org" >&2
     exit 1
 fi
+
 HOST="$1"
 
-LUKS_PASSPHRASE=$(op read "op://aizi3l3vxjc52mboshwj7bbytq/$HOST/password")
-echo -n "$LUKS_PASSPHRASE" | \
-    ssh -o UserKnownHostsFile="$HOME/.ssh/known_hosts.cryptroot-unlock" \
+LUKS_PASSPHRASE=$(op read "op://$OP_VAULT/$HOST/password")
+
+# The initramfs SSH server has its own host key, so it gets its own known_hosts file.
+echo -n "$LUKS_PASSPHRASE" |
+    ssh -o UserKnownHostsFile="$KNOWN_HOSTS_FILE" \
         -o StrictHostKeyChecking=accept-new \
         -o BatchMode=yes \
         "root@$HOST" cryptroot-unlock

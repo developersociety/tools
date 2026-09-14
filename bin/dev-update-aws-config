@@ -2,21 +2,35 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-if [ $# != 1 ]; then
-    echo "Must specify username"
+# help: Rewrite ~/.aws/config from the 1Password template
+#
+# Usage:
+#   dev update-aws-config username
+#
+# The existing config is moved aside with a timestamped name before the new one is written.
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
+CONFIG_FILE="$HOME/.aws/config"
+
+if [ "$#" -ne 1 ]; then
+    echo "Usage: dev update-aws-config username"
     exit 1
 fi
 
 CONFIG_USERNAME="$1"
 
-mkdir -p ~/.aws
+mkdir -p "$HOME/.aws"
 
-if [ -f ~/.aws/config ]; then
-    OLD_TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
-    echo "Backup of existing config saved to: $HOME/.aws/config.old.$OLD_TIMESTAMP"
-    mv ~/.aws/config "$HOME/.aws/config.old.$OLD_TIMESTAMP"
+if [ -f "$CONFIG_FILE" ]; then
+    TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
+    echo "Backup of existing config saved to: $CONFIG_FILE.old.$TIMESTAMP"
+    mv "$CONFIG_FILE" "$CONFIG_FILE.old.$TIMESTAMP"
 fi
 
-op read "op://Shared/AWS Config Template/notesPlain" | sed -e "s|USERNAME|$CONFIG_USERNAME|g" > ~/.aws/config
+op read "op://Shared/AWS Config Template/notesPlain" |
+    sed -e "s|USERNAME|$CONFIG_USERNAME|g" >"$CONFIG_FILE"
 
 echo "Config file updated!"

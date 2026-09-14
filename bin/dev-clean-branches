@@ -1,29 +1,52 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 IFS=$'\n\t'
 
+# help: Delete merged local branches and prune remotes
+#
+# Usage:
+#   dev clean-branches
+#
+# Deletes local branches which have been merged into the default branch. main, master, dev and
+# the repo's own default branch are never deleted.
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
+PROTECTED_BRANCHES="main master dev"
+
 # If the remote repo was added without the usual clone, then HEAD might be missing. A quick fix
 # can restore HEAD to the expected branch.
-if [[ ! -f .git/refs/remotes/origin/HEAD ]]; then
+if [ ! -f .git/refs/remotes/origin/HEAD ]; then
     git remote set-head origin --auto >/dev/null
 fi
 
 DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed -e "s|^refs/remotes/origin/||")
-BRANCHES=$(git branch --merged "$DEFAULT_BRANCH" --format "%(refname:short)" | grep -v -e "^main$" -e "^master$" -e "^dev$" -e "^${DEFAULT_BRANCH}$")
 
-if [[ -n $BRANCHES ]]; then
+# Collecting the branches into an array rather than filtering with grep, which exits non-zero
+# when everything has been filtered out and takes the whole script down with it.
+BRANCHES=()
+for BRANCH in $(git branch --merged "$DEFAULT_BRANCH" --format "%(refname:short)"); do
+    case " $PROTECTED_BRANCHES $DEFAULT_BRANCH " in
+    *" $BRANCH "*) continue ;;
+    esac
+
+    BRANCHES+=("$BRANCH")
+done
+
+if [ "${#BRANCHES[@]}" -gt 0 ]; then
     echo "Will remove the following branches:"
     echo
-    echo "$BRANCHES"
+    printf '%s\n' "${BRANCHES[@]}"
     echo
-    echo "Press Enter to delete the above branches, or <ctrl>-c to bail"
-    read -r
+    read -r -p "Press Enter to delete the above branches, or <ctrl>-c to bail"
 
-    echo "$BRANCHES" | xargs git branch -d
+    git branch -d "${BRANCHES[@]}"
 
     echo "Done."
 else
-    echo "No local branches needing"
+    echo "No local branches need removing"
 fi
 
 echo
