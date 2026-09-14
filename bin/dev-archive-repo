@@ -23,11 +23,11 @@ if [ "$#" -ne 1 ]; then
 fi
 
 # Handle org/repo, and repo
-if [[ $1 == *"/"* ]]; then
-    REPO_NAME="$1"
-else
-    REPO_NAME="$DEFAULT_ORG/$1"
-fi
+REPO_ARG="$1"
+case "$REPO_ARG" in
+*/*) REPO_NAME="$REPO_ARG" ;;
+*) REPO_NAME="$DEFAULT_ORG/$REPO_ARG" ;;
+esac
 PROJECT_NAME="${REPO_NAME##*/}"
 
 echo "I'm going to mirror: $REPO_NAME"

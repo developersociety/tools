@@ -15,7 +15,7 @@ if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 
-PROTECTED_BRANCHES="^main$|^master$|^dev$"
+PROTECTED_BRANCHES="main master dev"
 
 ASSUME_YES=0
 if [ "${1:-}" = "-y" ] || [ "${1:-}" = "--yes" ]; then
@@ -48,9 +48,9 @@ is_squash_merged() {
 
 BRANCHES=()
 for BRANCH in $(git branch --format "%(refname:short)"); do
-    if [[ $BRANCH =~ $PROTECTED_BRANCHES ]] || [[ $BRANCH == "$DEFAULT_BRANCH" ]]; then
-        continue
-    fi
+    case " $PROTECTED_BRANCHES $DEFAULT_BRANCH " in
+    *" $BRANCH "*) continue ;;
+    esac
 
     if git merge-base --is-ancestor "$BRANCH" "$BASE_BRANCH" || is_squash_merged "$BRANCH"; then
         BRANCHES+=("$BRANCH")
@@ -69,9 +69,9 @@ if [ "${#BRANCHES[@]}" -gt 0 ]; then
     fi
 
     # Git refuses to delete the branch you are standing on.
-    if [[ " ${BRANCHES[*]} " == *" $(git branch --show-current) "* ]]; then
-        git switch "$DEFAULT_BRANCH"
-    fi
+    case " ${BRANCHES[*]} " in
+    *" $(git branch --show-current) "*) git switch "$DEFAULT_BRANCH" ;;
+    esac
 
     # -D rather than -d, because squash-merged branches are not ancestors of the base branch and
     # git would refuse to delete them. is_squash_merged has already confirmed the work landed.

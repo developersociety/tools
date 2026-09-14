@@ -47,11 +47,10 @@ REPO_ARG="${REPO_ARG#git@github.com:}"
 REPO_ARG="${REPO_ARG%/}"
 REPO_ARG="${REPO_ARG%.git}"
 
-if [[ $REPO_ARG == *"/"* ]]; then
-    REPO_NAME="$REPO_ARG"
-else
-    REPO_NAME="$DEFAULT_ORG/$REPO_ARG"
-fi
+case "$REPO_ARG" in
+*/*) REPO_NAME="$REPO_ARG" ;;
+*) REPO_NAME="$DEFAULT_ORG/$REPO_ARG" ;;
+esac
 
 PROJECT_NAME="${REPO_NAME##*/}"
 GIT_URI="git@github.com:$REPO_NAME.git"
