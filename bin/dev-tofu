@@ -130,6 +130,6 @@ all)
     ;;
 *)
     ensure_initialised
-    exec aws-vault exec "$PROFILE" -- tofu "$@"
+    tofu_exec "$@"
     ;;
 esac
