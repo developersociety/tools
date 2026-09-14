@@ -10,9 +10,10 @@ class Devtools < Formula
   # keys its cache on: bump it to ship a release. While testing a branch, "brew fetch --force
   # devtools" clears the cached clone without a bump.
   TAP_CHECKOUT = Pathname.new(__dir__).parent.freeze
-  TAP_BRANCH = Utils.popen_read("git", "-C", TAP_CHECKOUT, "branch", "--show-current").strip.freeze
 
-  url "file://#{TAP_CHECKOUT}", using: :git, branch: TAP_BRANCH
+  # No "branch:" here - cloning a local repo follows its HEAD, which is whichever branch the tap
+  # is currently on, which is exactly what testing a branch needs.
+  url "file://#{TAP_CHECKOUT}", using: :git
   version "1.0.0"
 
   depends_on "aws-vault"

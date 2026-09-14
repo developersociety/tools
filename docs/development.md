@@ -3,16 +3,6 @@
 How to work on the tools themselves. For the house style, the shell conventions and how the tests
 are put together, see [AGENTS.md](../AGENTS.md).
 
-## Adding a tool
-
-New tools go in `bin/` named `dev-something`, with a `# help: one line summary` comment near the
-top. `dev help` picks them up automatically, and Homebrew installs anything matching `bin/dev*`,
-so there's no list to keep in sync. Every command has a test in `tests/`, which stubs out the
-commands it calls so it needs no credentials.
-
-[AGENTS.md](../AGENTS.md) has the step by step: the script header, the `--help` guard, and how the
-tests are put together.
-
 ## Tooling
 
 The tools needed to work on this repo are shellcheck and shfmt. There's no virtualenv, because

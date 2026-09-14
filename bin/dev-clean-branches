@@ -5,7 +5,7 @@ IFS=$'\n\t'
 # help: Delete merged local branches, including squash-merged ones, and prune remotes
 #
 # Usage:
-#   dev clean-branches [--yes]
+#   dev clean-branches
 #
 # Deletes local branches whose changes have landed on the default branch. Squash-merged branches
 # are found too, which "git branch --merged" cannot do on its own. main, master, dev and the
@@ -16,11 +16,6 @@ if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
 fi
 
 PROTECTED_BRANCHES="main master dev"
-
-ASSUME_YES=0
-if [ "${1:-}" = "-y" ] || [ "${1:-}" = "--yes" ]; then
-    ASSUME_YES=1
-fi
 
 # If the remote repo was added without the usual clone, then HEAD might be missing. A quick fix
 # can restore HEAD to the expected branch.
@@ -63,9 +58,7 @@ if [ "${#BRANCHES[@]}" -gt 0 ]; then
     printf '%s\n' "${BRANCHES[@]}"
     echo
 
-    if [ "$ASSUME_YES" -ne 1 ]; then
-        read -r -p "Press Enter to delete the above branches, or <ctrl>-c to bail"
-    fi
+    read -r -p "Press Enter to delete the above branches, or <ctrl>-c to bail"
 
     # Git refuses to delete the branch you are standing on.
     case " ${BRANCHES[*]} " in

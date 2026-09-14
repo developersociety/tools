@@ -47,7 +47,7 @@ git merge --quiet --squash squashed-branch >/dev/null 2>&1
 git commit --quiet -m "Squash merge of squashed-branch"
 git push --quiet origin main
 
-"$CLEAN_BRANCHES" --yes >/dev/null
+printf '\n' | "$CLEAN_BRANCHES" >/dev/null
 
 expect "merged and squash-merged branches go, the unmerged one stays" \
     "main unmerged-branch " "$(git branch --format "%(refname:short)" | sort | tr '\n' ' ')"
@@ -55,7 +55,7 @@ expect "merged and squash-merged branches go, the unmerged one stays" \
 # A second run has nothing to delete, which used to abort the script when grep found no matches.
 git switch --quiet main
 git branch --quiet -D unmerged-branch
-SECOND_RUN=$("$CLEAN_BRANCHES" --yes)
+SECOND_RUN=$(printf '\n' | "$CLEAN_BRANCHES")
 
 expect_contains "expected a clean repo to report nothing to remove" \
     "$SECOND_RUN" "No local branches need removing"
