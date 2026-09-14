@@ -36,10 +36,12 @@ echo "And then archive it on GitHub, which makes it read-only."
 echo
 read -r -p "Press Enter to continue, or <ctrl>-c to bail"
 
-TMPDIR=$(mktemp -d)
-trap 'rm -rf "$TMPDIR"' EXIT
+# Not $TMPDIR - that is the standard var mktemp and git read, and clobbering it would move
+# everyone else's temporary files in here too.
+WORK_DIR=$(mktemp -d)
+trap 'rm -rf "$WORK_DIR"' EXIT
 
-CLONE_DIR="$TMPDIR/$PROJECT_NAME.git"
+CLONE_DIR="$WORK_DIR/$PROJECT_NAME.git"
 
 git clone --bare "git@github.com:$REPO_NAME.git" "$CLONE_DIR"
 git -C "$CLONE_DIR" push --mirror "git@$ARCHIVE_HOST:archive/$PROJECT_NAME.git"
