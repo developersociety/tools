@@ -20,9 +20,10 @@ else
 fi
 
 GIT_URI="git@github.com:$REPO_NAME.git"
+# shellcheck disable=SC2153  # PROJECT_HOME is virtualenvwrapper's, not a typo of PROJECT_NAME
 PROJECT_DIR="$PROJECT_HOME/$PROJECT_NAME"
 
-if [ -a "$PROJECT_DIR" ]; then
+if [ -e "$PROJECT_DIR" ]; then
     echo "Target directory already exists:"
     echo "  $PROJECT_DIR"
     exit 1
