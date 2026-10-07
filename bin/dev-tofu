@@ -13,4 +13,6 @@ if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exec "$(dirname "$0")/dev" help "${0##*/dev-}"
 fi
 
-exec aws-vault exec devsoc-tofu -- tofu "$@"
+PROFILE="devsoc-tofu"
+
+exec aws-vault exec "$PROFILE" -- tofu "$@"
