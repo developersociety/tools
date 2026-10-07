@@ -20,7 +20,12 @@ else
 fi
 
 GIT_URI="git@github.com:$REPO_NAME.git"
-# shellcheck disable=SC2153  # PROJECT_HOME is virtualenvwrapper's, not a typo of PROJECT_NAME
+
+if [ -z "${PROJECT_HOME:-}" ]; then
+    echo "PROJECT_HOME is not set - is virtualenvwrapper configured?"
+    exit 1
+fi
+
 PROJECT_DIR="$PROJECT_HOME/$PROJECT_NAME"
 
 if [ -e "$PROJECT_DIR" ]; then
