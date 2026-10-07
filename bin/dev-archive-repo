@@ -2,6 +2,17 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# help: Mirror a repo to the archive server
+#
+# Usage:
+#   dev archive-repo repo
+#
+# Mirrors every branch and tag of a developersociety repo to the archive server.
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
 if [ $# != 1 ]; then
     echo "Must specify repo name to clone"
     exit 1

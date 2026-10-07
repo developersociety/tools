@@ -2,6 +2,18 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# help: Clone a repo and set up virtualenvwrapper for it
+#
+# Usage:
+#   dev clone [org/]repo
+#
+# Requires virtualenvwrapper, with $PROJECT_HOME set. A repo name given without an org is assumed
+# to be under developersociety. The Python version comes from tox.ini's basepython.
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
 # shellcheck disable=SC1090
 source "$VIRTUALENVWRAPPER_SCRIPT"
 

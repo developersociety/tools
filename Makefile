@@ -1,7 +1,7 @@
 SHELL=/bin/bash
 .DEFAULT_GOAL := help
 
-SHELL_SOURCES = bin/dev*
+SHELL_SOURCES = bin/dev* tests/*.sh
 
 
 # -------------------------------
@@ -21,6 +21,9 @@ install-local: ## Install the tools needed to work on this project.
 install-local:
 	brew install shellcheck shfmt
 
+check: ## Check for any obvious errors in the project's setup.
+check: lint test
+
 format: ## Run this project's code formatters.
 format:
 	shfmt --indent 4 --write $(SHELL_SOURCES)
@@ -29,3 +32,10 @@ lint: ## Lint the project.
 lint:
 	shellcheck $(SHELL_SOURCES)
 	shfmt --indent 4 --diff $(SHELL_SOURCES)
+
+test: ## Run this project's tests.
+test:
+	@for test in tests/test-*.sh; do \
+	    echo "== $$test"; \
+	    "$$test" || exit 1; \
+	done

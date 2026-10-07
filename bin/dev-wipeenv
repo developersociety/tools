@@ -2,6 +2,17 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# help: Uninstall every package in the active virtualenv
+#
+# Usage:
+#   dev wipeenv
+#
+# pip, setuptools and wheel are left alone.
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    exec "$(dirname "$0")/dev" help "${0##*/dev-}"
+fi
+
 if [ -z "$VIRTUAL_ENV" ]; then
     echo "Must be in a virtual env"
     exit 1
