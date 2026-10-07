@@ -9,7 +9,7 @@ fi
 HOST="$1"
 
 LUKS_PASSPHRASE=$(op read "op://aizi3l3vxjc52mboshwj7bbytq/$HOST/password")
-echo -n "$LUKS_PASSPHRASE" | \
+echo -n "$LUKS_PASSPHRASE" |
     ssh -o UserKnownHostsFile="$HOME/.ssh/known_hosts.cryptroot-unlock" \
         -o StrictHostKeyChecking=accept-new \
         -o BatchMode=yes \

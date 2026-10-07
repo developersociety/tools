@@ -17,6 +17,6 @@ if [ -f ~/.aws/config ]; then
     mv ~/.aws/config "$HOME/.aws/config.old.$OLD_TIMESTAMP"
 fi
 
-op read "op://Shared/AWS Config Template/notesPlain" | sed -e "s|USERNAME|$CONFIG_USERNAME|g" > ~/.aws/config
+op read "op://Shared/AWS Config Template/notesPlain" | sed -e "s|USERNAME|$CONFIG_USERNAME|g" >~/.aws/config
 
 echo "Config file updated!"
