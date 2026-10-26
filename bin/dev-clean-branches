@@ -26,8 +26,6 @@ fi
 
 DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed -e "s|^refs/remotes/origin/||")
 
-# Collecting the branches into an array rather than filtering with grep, which exits non-zero
-# when everything has been filtered out and takes the whole script down with it.
 BRANCHES=()
 for BRANCH in $(git branch --merged "$DEFAULT_BRANCH" --format "%(refname:short)"); do
     case " $PROTECTED_BRANCHES $DEFAULT_BRANCH " in
