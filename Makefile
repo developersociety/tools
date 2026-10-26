@@ -23,7 +23,7 @@ install-local:
 
 format: ## Run this project's code formatters.
 format:
-	shfmt --indent 4 --write $(SHELL_SOURCES)
+	shfmt --write $(SHELL_SOURCES)
 
 lint: ## Lint the project.
 lint:
