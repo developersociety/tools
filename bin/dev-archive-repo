@@ -9,9 +9,8 @@ IFS=$'\n\t'
 #
 # Mirrors every branch and tag of a developersociety repo to the archive server.
 
+# Prints the help block above
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
-    # Prints the help block above, from its "# help:" line to the first blank line, without
-    # the leading "# " or the "help: " marker.
     sed -n -e "/^# help: /,/^$/{s/^# \{0,1\}//; s/^help: //; p;}" "$0"
     exit 0
 fi
@@ -28,8 +27,6 @@ REPO_ARG="$1"
 
 echo "Archiving $REPO_ARG"
 
-# Not $TMPDIR - that is the standard var mktemp and git read, and clobbering it would move
-# everyone else's temporary files in here too.
 WORK_DIR=$(mktemp -d)
 trap 'rm -rf "$WORK_DIR"' EXIT
 
