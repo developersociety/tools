@@ -19,8 +19,13 @@ help:
 
 install-local: ## Install the tools needed to work on this project.
 install-local:
-	brew install shfmt
+	brew install shellcheck shfmt
 
 format: ## Run this project's code formatters.
 format:
 	shfmt --write $(SHELL_SOURCES)
+
+lint: ## Lint the project.
+lint:
+	shellcheck $(SHELL_SOURCES)
+	shfmt --diff $(SHELL_SOURCES)

@@ -20,9 +20,15 @@ else
 fi
 
 GIT_URI="git@github.com:$REPO_NAME.git"
+
+if [ -z "${PROJECT_HOME:-}" ]; then
+    echo "PROJECT_HOME is not set - is virtualenvwrapper configured?"
+    exit 1
+fi
+
 PROJECT_DIR="$PROJECT_HOME/$PROJECT_NAME"
 
-if [ -a "$PROJECT_DIR" ]; then
+if [ -e "$PROJECT_DIR" ]; then
     echo "Target directory already exists:"
     echo "  $PROJECT_DIR"
     exit 1
