@@ -28,4 +28,4 @@ format:
 lint: ## Lint the project.
 lint:
 	shellcheck $(SHELL_SOURCES)
-	shfmt --indent 4 --diff $(SHELL_SOURCES)
+	shfmt --diff $(SHELL_SOURCES)
