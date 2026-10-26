@@ -61,8 +61,6 @@ cd "$PROJECT_DIR"
 # mkproject fails with super strict mode - so we need to allow unbound variables at this point
 set +u
 
-# The -f test only stops grep complaining about a missing tox.ini - a repo without one takes the
-# same branch either way.
 if [ -f tox.ini ] && grep --fixed-strings --silent "basepython" tox.ini; then
     PYTHON_VERSION=$(sed -n -e 's/^[[:space:]]*basepython[[:space:]]*=[[:space:]]*//p' tox.ini |
         head -n 1)
