@@ -36,5 +36,3 @@ $ dev-clone --help
 | `dev-update-aws-config` | Rewrite `~/.aws/config` from the 1Password template | 1Password CLI (`op`)            |
 | `dev-unlock-server`     | Unlock the encrypted root filesystem on a server    | 1Password CLI (`op`)            |
 | `dev-archive-repo`      | Mirror a repo to the archive server                 |                                 |
-
-To work on the tools themselves, see [docs/development.md](docs/development.md).
