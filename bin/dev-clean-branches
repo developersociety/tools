@@ -16,7 +16,7 @@ if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
     exit 0
 fi
 
-PROTECTED_BRANCHES="main master dev"
+PROTECTED_BRANCHES="main master dev ce"
 
 # If the remote repo was added without the usual clone, then HEAD might be missing. A quick fix
 # can restore HEAD to the expected branch.
