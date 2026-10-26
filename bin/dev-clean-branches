@@ -10,9 +10,8 @@ IFS=$'\n\t'
 # Deletes local branches which have been merged into the default branch. main, master, dev and
 # the repo's own default branch are never deleted.
 
+# Prints the help block above
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
-    # Prints the help block above, from its "# help:" line to the first blank line, without
-    # the leading "# " or the "help: " marker.
     sed -n -e "/^# help: /,/^$/{s/^# \{0,1\}//; s/^help: //; p;}" "$0"
     exit 0
 fi
